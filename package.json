@@ -1,0 +1,27 @@
+{
+  "name": "pokemon-card-nft",
+  "version": "1.0.0",
+  "description": "Pokemon Card NFT Trading Platform",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "node": "hardhat node",
+    "deploy": "hardhat run scripts/deploy.js --network localhost",
+    "deploy:local": "chmod +x ./deploy-local.sh && ./deploy-local.sh",
+    "deploy:sepolia": "chmod +x ./deploy-sepolia.sh && ./deploy-sepolia.sh"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "5.2.0",
+    "dotenv": "^16.4.1"
+  },
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.2.3",
+    "@nomiclabs/hardhat-waffle": "^2.0.6",
+    "chai": "^4.3.7",
+    "ethereum-waffle": "^4.0.10",
+    "ethers": "^5.7.2",
+    "hardhat": "^2.17.0",
+    "kill-port": "^2.0.1"
+  }
+} 
