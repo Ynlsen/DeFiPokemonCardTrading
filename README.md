@@ -100,7 +100,6 @@ nano .env
 # Add the following lines:
 # VITE_TOKEN_CONTRACT_ADDRESS=<your-token-contract-address>
 # VITE_TRADING_CONTRACT_ADDRESS=<your-trading-contract-address>
-# VITE_NETWORK_ID=<network-id> # 31337 for local, 11155111 for Sepolia
 
 # Install frontend dependencies
 npm install
@@ -113,8 +112,6 @@ npm run build
 npm run serve
 ```
 
-## Troubleshooting
-
 ## Technical Architecture
 
 ### Smart Contracts
@@ -122,11 +119,12 @@ npm run serve
 Two primary smart contracts handle the core functionality:
 
 1. **PokemonCardToken.sol**: ERC-721 NFT implementation
+   
    - Minting of Pokemon cards with unique attributes
    - Ownership tracking and transfer capabilities
    - Metadata storage for Pokemon ID and rarity
-
 2. **PokemonCardTrading.sol**: Marketplace contract
+   
    - Fixed-price listings
    - Time-limited auctions
    - Secure escrow for listed cards
@@ -144,8 +142,6 @@ The frontend is built with a component-based architecture centered around React:
 - **Component-Level State**: Local state for UI components
 - **Custom Hooks**: Reusable logic encapsulation
 
-
-
 ## Project Structure
 
 ```
@@ -158,15 +154,17 @@ pokemon-card-nft/
 │   ├── src/                    # Source code
 │   │   ├── components/         # React components
 │   │   ├── contexts/           # Context providers
+│   │   ├── contracts/          # Contract ABI's
 │   │   ├── pages/              # Page components
 │   │   ├── providers/          # App providers
 │   │   ├── utils/              # Utility functions
 │   │   ├── App.jsx             # Main application
 │   │   └── main.jsx            # Entry point
 │   ├── .env.example            # Environment variables template
+│   ├── deploy-frontend.sh      # Frontend deployment script
 │   └── package.json            # Frontend dependencies
-├── scripts/                    # Deployment and contract interaction scripts
-├── test/                       # Contract test files
+├── scripts/                    # Deployment scripts
+├── test/                       # Contract test scripts
 ├── hardhat.config.js           # Hardhat configuration
 ├── package.json                # Project dependencies
 ├── README.md                   # This document
@@ -200,20 +198,36 @@ pokemon-card-nft/
 - **Card Filtering**: Filter cards by Pokemon type, rarity and more
 - **Responsive Design**: Works well on all device sizes
 
-## Development Mode Features
+## Testing Features
+
+### Contract Test Scripts
+
+After deploying the contracts locally, you can execute test scripts that will check all the functionalities of the contracts. (If the frontend is running, you can directly view the cards and listings that are created by them)
+
+```
+npx hardhat run test/mint-test.js --network localhost
+npx hardhat run test/fixed-price-test.js --network localhost
+npx hardhat run test/auction-test.js --network localhost
+npx hardhat run test/comprehensive-test.js --network localhost
+```
+
+### Explicit Testing
+
+For more granular testing, connect your wallet to the frontend after deploying locally. Remember to switch your wallet to the correct local network and use the private key provided by the deploy-local script to interact with the contracts directly.
+
+### Frontend Dev Mode
 
 The application includes robust development features to help test and debug:
 
-- **Mock Data**: Auto-generated when contract calls fail
-- **Development Indicators**: Visual cues for mock data
+- **Mock Data**: Auto-generated data when contract calls fail
 - **Contract Status**: Display of connection status
 - **Diagnostic Tools**: Built-in troubleshooting tools
 
 To use development mode:
 
-1. Start with `npm run dev`
-2. Look for mock data indicators
-3. Use diagnostic tools for contract connectivity issues
+1. Start frontend with `npm run dev`
+2. Use diagnostic tools for contract connectivity issues
+3. Check functionality with mock data
 
 ## Security Considerations
 
@@ -225,19 +239,11 @@ The contracts implement several best practices:
 - **Withdrawal Pattern**: Prevents reentrancy attacks
 - **Event Emissions**: Complete audit trail via events
 
-### Contract Connectivity
-
-1. **Check Browser Console**: Look for specific error messages
-2. **Verify MetaMask**: Ensure correct network connection
-3. **Check Environment Variables**: Verify contract addresses in `.env`
-4. **Run Diagnostics**: Use built-in diagnostic tools
-
-### Common Issues
+## Common Issues
 
 - **MetaMask not detecting**: Ensure extension is installed and unlocked
 - **Wrong network**: Switch to the correct network in MetaMask
 - **Invalid contract addresses**: Double-check `.env` file
-- **Missing ABIs**: Verify contract ABIs in `src/contracts/`
 
 ## Etherscan Verification
 
@@ -263,6 +269,5 @@ npx hardhat verify --network sepolia YOUR_TRADING_ADDRESS YOUR_TOKEN_ADDRESS
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details. 
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-//TODO test skripts.
