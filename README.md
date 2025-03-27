@@ -56,17 +56,20 @@ chmod +x deploy-sepolia.sh
 npm run deploy:sepolia
 ```
 
-### Frontend Deployment
-
-If contracts are already deployed:
+### Automatic Frontend Deployment
 
 #### For Linux:
 
 ```bash
 cd frontend
+
 chmod +x deploy-frontend.sh
+
 ./deploy-frontend.sh
 ```
+
+If you want to switch networks without deploying the backend again, you must edit the .env file yourself or simply delete it.
+
 
 ### Manual Deployment (Linux)
 
@@ -263,9 +266,7 @@ npx hardhat verify --network sepolia YOUR_TRADING_ADDRESS YOUR_TOKEN_ADDRESS
 - **Smart Contracts**: Solidity 0.8.20, OpenZeppelin
 - **Frontend**: React 18, Vite, TailwindCSS
 - **Blockchain Interaction**: ethers.js 6
-- **Routing**: React Router 6
 - **External Data**: PokeAPI
-- **Development**: Node.js, npm
 
 ## License
 
