@@ -135,6 +135,7 @@ echo -e "${BLUE}   npx hardhat run test/comprehensive-test.js --network localhos
 
 echo -e "${YELLOW}Or import one of the test accounts into your wallet (very useful for testing the frontend) using:${ENDCOLOR}"
 echo -e "${BLUE}   Private key: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80${ENDCOLOR}"
+echo -e "${YELLOW}More accounts and general logs can be found in hardhat_node.log${ENDCOLOR}"
 echo ""
 echo -e "${GREEN}Local contract deployment successful!${ENDCOLOR}"
 
