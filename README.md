@@ -213,7 +213,7 @@ npx hardhat run test/comprehensive-test.js --network localhost
 
 ### Explicit Testing
 
-For more granular testing, connect your wallet to the frontend after deploying locally. Remember to switch your wallet to the correct local network and use the private key provided by the deploy-local script to interact with the contracts directly.
+For more granular testing, connect your wallet to the frontend after deploying locally. Make sure to switch your wallet to the correct local network and use either the private key provided by the deploy-local script or one from the generated hardhat_node.log file to interact with the contracts directly.
 
 ### Frontend Dev Mode
 
