@@ -68,7 +68,7 @@ const PokemonCard = ({ tokenId, fType = "", compact = false }) => {
   const isAuction = listing?.isAuction;
 
   // Format the price display
-  const priceDisplay = formatEth(isAuction ? (highestBid || price) : price);
+  const priceDisplay = formatEth(Math.max(highestBid,price));
 
 
   return ( ( fType == "" || fType == 'all' || types.includes(fType) ) && (
@@ -128,7 +128,7 @@ const PokemonCard = ({ tokenId, fType = "", compact = false }) => {
               {isAuction ? 'Current Bid' : 'Price'}:
             </span>
             <span className="font-bold text-indigo-600">
-              {priceDisplay} ETH
+              {priceDisplay}
             </span>
           </div>
         )}
