@@ -121,7 +121,7 @@ trap 'echo -e "${BLUE}Stopping Hardhat node...${ENDCOLOR}"; kill $NODE_PID 2>/de
 # Deployment complete - show next steps and test info
 echo -e "${BOLD}${GREEN}Local Deployment Complete!${ENDCOLOR}"
 echo -e "${BOLD}${YELLOW}Next Steps:${ENDCOLOR}"
-echo -e "${YELLOW}1. To deploy the frontend, run:${ENDCOLOR}"
+echo -e "${YELLOW}1. To deploy the frontend, open another terminal and run:${ENDCOLOR}"
 echo -e "${BLUE}   cd frontend && ./deploy-frontend.sh${ENDCOLOR}"
 echo -e "${YELLOW}2. The Hardhat node is running in the background (Ctrl+C to stop)${ENDCOLOR}"
 echo -e "${YELLOW}3. Frontend environment is configured in frontend/.env${ENDCOLOR}"
