@@ -82,8 +82,6 @@ const CardDetailPage = () => {
   
   // Handle card purchase
   const handlePurchase = async () => {
-    if (!listing || !buyCard) return;
-    
     try {
       setSubmitting(true);
       setError('');
@@ -92,7 +90,7 @@ const CardDetailPage = () => {
       const success = await buyCard(listing.tokenId, listing.price);
       
       if (success) {
-        navigate('/my-cards');
+        loadCardData();
       } else {
         setError('Transaction failed. Please try again.');
       }

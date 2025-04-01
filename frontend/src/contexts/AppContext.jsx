@@ -493,16 +493,15 @@ export const AppProvider = ({ children }) => {
     );
   }, [state.contracts.tradingContract, approveAndExecute]);
 
-  // Simplified buyCard
+  // Function calls contract to buy a specific token for a specific price
   const buyCard = useCallback(async (tokenId, price) => {
     try {
       if (!state.contracts.tradingContract) {
         throw new Error('Trading contract not initialized');
       }
 
-      const priceInWei = ethers.parseEther(price.toString());
       const tx = await state.contracts.tradingContract.buyCard(tokenId, { 
-        value: priceInWei 
+        value: price
       });
       await tx.wait();
 

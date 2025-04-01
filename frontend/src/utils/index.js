@@ -17,14 +17,11 @@ export const formatAddress = (address, prefixLen = 6, suffixLen = 4) =>
   address.length < (prefixLen + suffixLen + 3) ? address : 
   `${address.slice(0, prefixLen)}...${address.slice(-suffixLen)}`;
 
-/**
- * Format ETH amount for display
- * @param {string|number} amount - Amount in ETH to format
- * @param {number} [decimals=4] - Decimal places to show
- * @returns {string} Formatted ETH amount
- */
+// Format wei price into gwei or eth depending on the amount
 export const formatEth = (amount, decimals = 4) => 
-  !amount ? '0 ETH' : `${parseFloat(amount).toFixed(decimals)} ETH`;
+  (amount >= 1000000000000000000.0) ? `${(parseFloat(amount)/1000000000000000000.0).toFixed(decimals)} ETH` : 
+  ((amount >= 1000000000) ?           `${(parseFloat(amount)/1000000000).toFixed(decimals)} Gwei` :
+                                      `${(parseFloat(amount))} Wei`);
 
 /**
  * Format date from UNIX timestamp
