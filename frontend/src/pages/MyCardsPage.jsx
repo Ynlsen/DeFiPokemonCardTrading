@@ -22,8 +22,6 @@ const MyCardsPage = () => {
   const [withdrawError, setWithdrawError] = useState(null);
 
   const fetchCards = async () => {
-    if (!account) return;
-    
     setLoadingState(true);
     try {
       const ownedCards = await getOwnedCards();
