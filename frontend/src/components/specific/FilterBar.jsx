@@ -66,7 +66,7 @@ const FilterBar = ({ filters, onFilterChange, cardTypes = [] }) => {
         {/* Price range */}
         <div>
           <label htmlFor="minPrice" className="block text-sm font-medium mb-1 text-gray-700">
-            Min Price (ETH)
+            Min Price (Wei)
           </label>
           <input
             id="minPrice"
@@ -83,7 +83,7 @@ const FilterBar = ({ filters, onFilterChange, cardTypes = [] }) => {
         
         <div>
           <label htmlFor="maxPrice" className="block text-sm font-medium mb-1 text-gray-700">
-            Max Price (ETH)
+            Max Price (Wei)
           </label>
           <input
             id="maxPrice"
@@ -112,8 +112,8 @@ const FilterBar = ({ filters, onFilterChange, cardTypes = [] }) => {
             onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           >
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
+            <option value="idUp">ID: Low to High</option>
+            <option value="idDown">ID: High to Low</option>
             <option value="priceAsc">Price: Low to High</option>
             <option value="priceDesc">Price: High to Low</option>
           </select>
@@ -158,7 +158,7 @@ const FilterBar = ({ filters, onFilterChange, cardTypes = [] }) => {
               maxPrice: '',
               showAuction: true,
               showFixedPrice: true,
-              sortBy: 'newest'
+              sortBy: 'idUp'
             })}
             className="w-full px-4 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >

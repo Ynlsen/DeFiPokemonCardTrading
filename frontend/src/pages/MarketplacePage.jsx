@@ -13,7 +13,7 @@ const MarketplacePage = () => {
   const [loading, setLoading] = useState(true);
 
   const { 
-    getMarketplaceListings,
+    getAllListedCards,
     connectWallet,
     account
   } = useApp();
@@ -27,7 +27,7 @@ const MarketplacePage = () => {
     maxPrice: '',
     showAuction: true,
     showFixedPrice: true,
-    sortBy: 'newest'
+    sortBy: 'idUp'
   });
 
 
@@ -39,7 +39,7 @@ const MarketplacePage = () => {
       setLoading(true)
 
       try {
-        const data = await getMarketplaceListings();
+        const data = await getAllListedCards();
         
         setListings(data);
 
@@ -64,7 +64,7 @@ const MarketplacePage = () => {
       }
       
       // Apply rarity filter
-      if (filters.rarity && filters.rarity !== 'all' && card.rarity !== parseInt(filters.rarity)) {
+      if (filters.rarity && filters.rarity !== 'all' && String(card.rarity) !== filters.rarity) {
         return false;
       }
       
@@ -98,16 +98,16 @@ const MarketplacePage = () => {
     return [...filteredListings].sort((a, b) => {
       // Sort by selected criteria
       switch (filters.sortBy) {
-        case 'newest':
-          return (b.listing?.listingTime || 0) - (a.listing?.listingTime || 0);
-        case 'oldest':
-          return (a.listing?.listingTime || 0) - (b.listing?.listingTime || 0);
+        case 'idUp':
+          return (a.tokenId) - (b.tokenId);
+        case 'idDown':
+          return (b.tokenId) - (a.tokenId);
         case 'priceAsc':
-          return parseFloat(formatEth(Math.max(a.listing.highestBid, a.listing.price))) - 
-                 parseFloat(formatEth(Math.max(b.listing.highestBid, b.listing.price)));
+          return parseFloat(Math.max(a.listing.highestBid, a.listing.price)) - 
+                 parseFloat(Math.max(b.listing.highestBid, b.listing.price));
         case 'priceDesc':
-          return parseFloat(formatEth(Math.max(b.listing.highestBid, b.listing.price))) - 
-                 parseFloat(formatEth(Math.max(a.listing.highestBid, a.listing.price)));
+          return parseFloat(Math.max(b.listing.highestBid, b.listing.price)) - 
+                 parseFloat(Math.max(a.listing.highestBid, a.listing.price));
         default:
           return 0;
       }
@@ -132,7 +132,7 @@ const MarketplacePage = () => {
       maxPrice: '',
       showAuction: true,
       showFixedPrice: true,
-      sortBy: 'newest'
+      sortBy: 'idUp'
     });
   }, []);
 
