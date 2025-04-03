@@ -359,7 +359,9 @@ export const AppProvider = ({ children }) => {
   // Simplified executeTransaction - removes redundant error handling
   const executeTransaction = useCallback(async (txFn, errorMsg) => {
     try {
-      return await txFn();
+      const tx = await txFn();
+      await tx.wait();
+      return true;
     } catch (err) {
       console.error(errorMsg, err);
       return false;
@@ -385,37 +387,16 @@ export const AppProvider = ({ children }) => {
       const tx = await txFn();
       await tx.wait();
       
-      return tx;
+      return true;
     } catch (error) {
       console.error(errorMsg, error);
       return false;
     }
   }, [state.contracts]);
 
-  // Simplified mintCard with proper parameters
-  const mintPokemonCard = useCallback(async (pokemonId, rarity) => {
-    try {
-      if (!state.contracts.tokenContract || !state.wallet.account) {
-        throw new Error('Contract not initialized or wallet not connected');
-      }
-
-      const tx = await state.contracts.tokenContract.mintPokemonCard(
-        state.wallet.account,
-        pokemonId,
-        rarity
-      );
-      await tx.wait();
-
-      return true;
-    } catch (error) {
-      console.error('Failed to mint card:', error);
-      return false;
-    }
-  }, [state.contracts.tokenContract, state.wallet.account]);
-
   // Get owned tokens - simplified to avoid using tokenOfOwnerByIndex which doesn't exist
   const getOwnedTokens = useCallback(async (ownerAddress = state.wallet.account) => {
-    return executeTransaction(async () => {
+    try {
       if (!state.contracts.tokenContract) throw new Error('Token contract not initialized');
       
       const balance = await state.contracts.tokenContract.balanceOf(ownerAddress);
@@ -426,8 +407,11 @@ export const AppProvider = ({ children }) => {
         balance: Number(balance),
         ownerAddress
       };
-    }, 'Failed to get owned tokens');
-  }, [state.contracts.tokenContract, state.wallet.account, executeTransaction]);
+    } catch (err) {
+      console.error('Failed to get owned tokens', err);
+      return { balance: 0, ownerAddress }; // Return default on error
+    }
+  }, [state.contracts.tokenContract, state.wallet.account]);
 
   /**
    * Get detailed card data by token ID
@@ -443,12 +427,17 @@ export const AppProvider = ({ children }) => {
 
       const owner = await state.contracts.tokenContract.ownerOf(tokenId);
 
+      const listing = await getListingDetails(tokenId);
+
       return {
+        tokenId: tokenId,
         pokemonId: cardData.pokemonId,
         rarity: cardData.rarity,
-        owner: owner
+        owner: owner,
+        listing: listing 
       };
     } catch (error) {
+      console.error(`Error fetching card data for token ${tokenId}:`, error);
       return isDev ? generateMockCard(tokenId) : null;
     }
   };
@@ -458,14 +447,8 @@ export const AppProvider = ({ children }) => {
     return approveAndExecute(
       tokenId,
       async () => {
-        const priceInWei = ethers.parseEther(price.toString());
-        // Call listCardForSale instead of listCard to match the ABI
-        const tx = await state.contracts.tradingContract.listCardForSale(tokenId, priceInWei);
-        
-        dispatch({
-          type: actions.contracts.SET_TRANSACTION,
-          payload: { hash: tx.hash, type: 'list' }
-        });
+
+        const tx = await state.contracts.tradingContract.listCardForSale(tokenId, price);
         
         return tx;
       },
@@ -478,14 +461,8 @@ export const AppProvider = ({ children }) => {
     return approveAndExecute(
       tokenId,
       async () => {
-        const priceInWei = ethers.parseEther(startingPrice.toString());
-        // Call listCardForAuction instead of createAuction to match the ABI
-        const tx = await state.contracts.tradingContract.listCardForAuction(tokenId, priceInWei, duration);
-        
-        dispatch({
-          type: actions.contracts.SET_TRANSACTION,
-          payload: { hash: tx.hash, type: 'auction' }
-        });
+
+        const tx = await state.contracts.tradingContract.listCardForAuction(tokenId, startingPrice, duration);
         
         return tx;
       },
@@ -493,66 +470,42 @@ export const AppProvider = ({ children }) => {
     );
   }, [state.contracts.tradingContract, approveAndExecute]);
 
-  // Function calls contract to buy a specific token for a specific price
-  const buyCard = useCallback(async (tokenId, price) => {
-    try {
-      if (!state.contracts.tradingContract) {
-        throw new Error('Trading contract not initialized');
-      }
-
-      const tx = await state.contracts.tradingContract.buyCard(tokenId, { 
-        value: price
+  // Function calls contract to buy a specific token for a specific price (expects price in Wei)
+  const buyCard = useCallback(async (tokenId, priceWei) => {
+    return executeTransaction(async () => {
+      return state.contracts.tradingContract.buyCard(tokenId, { 
+        value: priceWei
       });
-      await tx.wait();
+    }, 'Failed to buy card');
+  }, [state.contracts.tradingContract, executeTransaction]);
 
-      return true;
-    } catch (error) {
-      console.error('Failed to buy card:', error);
-      return false;
-    }
-  }, [state.contracts.tradingContract]);
-
-  // Simplified placeBid
+  // Place bid (expects bidAmount in Wei)
   const placeBid = useCallback(async (tokenId, bidAmount) => {
-    try {
-      if (!state.contracts.tradingContract) {
-        throw new Error('Trading contract not initialized');
-      }
-
-      const bidInWei = ethers.parseEther(bidAmount.toString());
-      const tx = await state.contracts.tradingContract.placeBid(tokenId, { 
-        value: bidInWei 
+    return executeTransaction(async () => {
+      return state.contracts.tradingContract.placeBid(tokenId, { 
+        value: bidAmount 
       });
-      await tx.wait();
+    }, 'Failed to place bid');
+  }, [state.contracts.tradingContract, executeTransaction]);
 
-      return true;
-    } catch (error) {
-      console.error('Failed to place bid:', error);
-      return false;
-    }
-  }, [state.contracts.tradingContract]);
-
-  // Get all listings - use stable caching to prevent flickering
+  // Get all listings
   const getAllListings = useCallback(async () => {
     const isDev = import.meta.env.MODE === 'development';
-    
-    // To eliminate flickering, use a stable cached result once retrieved
-    if (getAllListings.cachedData) {
-      return getAllListings.cachedData;
-    }
     
     try {
       // TODO test performance for larger numbers!
       // For production, check 20 token IDs and see which ones are listed
       const maxTokensToCheck = 20;
-      const activeListings = [];
+      const listedTokenIds = [];
       
       for (let i = 0; i < maxTokensToCheck; i++) {
         try {
-          await state.contracts.tokenContract.ownerOf(i)
+          // Check if token exists first
+          await state.contracts.tokenContract.ownerOf(i);
+          // Then check if it's listed
           const listing = await state.contracts.tradingContract.listings(i);
           if (listing.active) {
-            activeListings.push(i);
+            listedTokenIds.push(i);
           }
         } catch (err) {
           // This probaly means that ownerOf faild which implies thath we have scanned through every token
@@ -560,15 +513,13 @@ export const AppProvider = ({ children }) => {
         }
       }
 
-      if(isDev && activeListings.length < 1){
+      if(isDev && listedTokenIds.length < 1){
         const mockData = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-        getAllListings.cachedData = mockData;
+        console.log("Using mock listing IDs for development.");
         return mockData; 
       }
       
-      // Cache the result
-      getAllListings.cachedData = activeListings;
-      return activeListings;
+      return listedTokenIds;
     } catch (error) {
       console.error("Couldn't get all listings:",error);
       return null;
@@ -577,36 +528,33 @@ export const AppProvider = ({ children }) => {
 
   // Get listing details
   const getListingDetails = useCallback(async (tokenId) => {
-    // TODO: remove Dev condition or make a way fo acctual cards to still be displyed idk
+    // In Dev Mode, the function returns a mock listing if no active listing is found
     const isDev = import.meta.env.MODE === 'development';
     
     try {
-      
-      if(isDev){
-        return generateMockListing(tokenId);
-      }
-
 
       const rawListing = await state.contracts.tradingContract.listings(tokenId);
-      
-      if (!rawListing) {
-        throw new Error('No listing data');
-      }
       
       const listing = {
         tokenId: tokenId,
         seller: rawListing.seller,
         price: rawListing.price.toString(),
-        isAuction: rawListing.listingType === 1,
+        isAuction: rawListing.listingType,
         isActive: rawListing.active,
         highestBidder: rawListing.highestBidder,
         highestBid: rawListing.highestBid.toString(),
         endTime: rawListing.endTime
       };
+      if(isDev && !listing.isActive){
+        return generateMockListing(tokenId);
+      }
       return listing;
 
     } catch (error) {
-      // Only if access to listings mapping fails
+      if(isDev){
+        return generateMockListing(tokenId);
+      }
+
       console.error('Failed to load listing:', error);
       return null;
     }
@@ -626,26 +574,24 @@ export const AppProvider = ({ children }) => {
       isActive: true,
       highestBidder: isAuction ? randomAddr() : '0x0000000000000000000000000000000000000000',
       highestBid: isAuction ? ethers.parseEther((Math.random() * 0.05 + 0.02).toFixed(4)).toString() : '0',
-      endTime: isAuction ? Date.now() + Math.floor(Math.random() * 604800000) : 0
+      endTime: isAuction ? (Date.now() / 1000 + Math.floor(Math.random() * 604800)).toString() : '0'
     };
   };
 
-  // Simplified cancelListing
+  // Cancel listing
   const cancelListing = useCallback(async (tokenId) => {
-    try {
-      if (!state.contracts.tradingContract) {
-        throw new Error('Trading contract not initialized');
-      }
+    return executeTransaction(async () => {
+      return state.contracts.tradingContract.cancelListing(tokenId);
+    }, 'Failed to cancel listing');
+  }, [state.contracts.tradingContract, executeTransaction]);
 
-      const tx = await state.contracts.tradingContract.cancelListing(tokenId);
-      await tx.wait();
+  // End Auction
+  const endAuction = useCallback(async (tokenId) => {
+    return executeTransaction(async () => {
+      return state.contracts.tradingContract.endAuction(tokenId);
+    }, 'Failed to end auction');
+  }, [state.contracts.tradingContract, executeTransaction]);
 
-      return true;
-    } catch (error) {
-      console.error('Failed to cancel listing:', error);
-      return false;
-    }
-  }, [state.contracts.tradingContract]);
 
   // Simplified fetch and format Pokemon data
   const fetchPokemonData = useCallback(async (pokemonId) => {
@@ -659,6 +605,12 @@ export const AppProvider = ({ children }) => {
 
       const typeId = data.types.map(type => (type.type.url).substr(31).slice(0,-1));
 
+
+      console.log(typeId);
+
+
+      
+   
       console.log(typeId);
 
 
@@ -669,11 +621,12 @@ export const AppProvider = ({ children }) => {
         typeIds: typeId
       };
     } catch (error) {
+      console.error(`Error fetching Pokemon data from PokeAPI for ID ${pokemonId}:`, error);
       if (isDev) {
         return {
           name: `pokemon-${pokemonId}`,
           types: ['normal'],
-          typeIds: [1]
+          typeIds: ['1']
         };
       }
       return null;
@@ -704,70 +657,31 @@ export const AppProvider = ({ children }) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
-  // Simplified getMarketplaceListings to use cached data and prevent flickering
-  const getMarketplaceListings = useCallback(async () => {
-    const isDev = import.meta.env.MODE === 'development';
-    
-    // Use persistent cache to prevent flickering
-    if (getMarketplaceListings.cachedData) {
-      return getMarketplaceListings.cachedData;
-    }
+  // Get data for all listed cards
+  const getAllListedCards = useCallback(async () => {
     
     try {
 
       const tokenIds = await getAllListings();
-
 
       
       // Get card data for each token ID
       const cards = await Promise.all(
         tokenIds.map(tokenId => getCardData(tokenId))
       );
-      
+      return cards;
 
-
-      
-      // Filter out nulls and cache the result
-      const validCards = cards.filter(Boolean);
-      if (validCards.length) {
-        getMarketplaceListings.cachedData = validCards;
-        return validCards;
-      }
-
-      return mockData;
     } catch (error) {
-      // Log error once and return mock data
-      if (!getMarketplaceListings.hasLogged) {
-        console.warn('Error fetching marketplace listings:', error.message || error);
-        getMarketplaceListings.hasLogged = true;
-      }
-      
-      const mockData = isDev ? generateMockCards(8) : [];
-      getMarketplaceListings.cachedData = mockData;
-      return mockData;
+
+      console.warn('Error fetching marketplace listings:', error);
+      return null;
     }
   }, [getAllListings, getCardData]);
 
-  /**
-   * Get all active auctions with details
-   * @returns {Promise<Array>} Array of cards with auction details
-   */
-  const getActiveAuctions = async () => {
-    // Reuse the getMarketplaceListings function and filter for auctions
-    const listings = await getMarketplaceListings();
-    
-    // Only return listings that are auctions
-    return listings.filter(card => card.listing && card.listing.isAuction === true);
-  };
 
   // Get cards owned by the current account - optimized to prevent flickering
   const getOwnedCards = useCallback(async () => {
-    const isDev = import.meta.env.MODE === 'development' || window.location.hostname === 'localhost';       
-
-    // Use persistent cache to prevent flickering
-    if (getOwnedCards.cachedData) {
-      return getOwnedCards.cachedData;
-    }
+    const isDev = import.meta.env.MODE === 'development';       
 
     // Return empty array if no account
     if (!state.wallet.account) {
@@ -775,41 +689,25 @@ export const AppProvider = ({ children }) => {
     }
 
     try {
-      // Generate mock data for dev environment or when contract isn't available
-      if (isDev || !state.contracts.tokenContract) {
-        const mockData = generateMockCards(5);
-        // Cache the result
-        getOwnedCards.cachedData = mockData;
-        return mockData;
-      }
 
       // Get balance from token contract
       const balance = await state.contracts.tokenContract.balanceOf(state.wallet.account);
-      const tokenCount = Number(balance || 0);
       
-      // In production with no tokenOfOwnerByIndex function, we'll generate
-      // placeholder cards based on the balance
-      const cardIds = Array.from({ length: tokenCount }, (_, i) => i + 1);
-      
-      // Get card data for each token ID
-      const cardsData = await Promise.all(
-        cardIds.map(id => getCardData(id))
-      );
+      // Missing tokenOfOwnerByIndex function in contract TODO: Implement
 
       // Filter out null results
-      const validCards = cardsData.filter(Boolean);
+      const validCards = [];
       
-      // Cache the result
-      getOwnedCards.cachedData = validCards;
+      if(isDev && validCards.length == 0){
+        return generateMockCards(5);
+      }
       return validCards;
     } catch (error) {
       console.error('Error getting owned cards:', error);
       
       // Return mock data in development
       if (isDev) {
-        const mockData = generateMockCards(5);
-        getOwnedCards.cachedData = mockData;
-        return mockData;
+        return generateMockCards(5);
       }
       
       return [];
@@ -855,23 +753,23 @@ export const AppProvider = ({ children }) => {
     formatAddress,
     
     // Token operations
-    mintPokemonCard,
     getOwnedTokens,
     getCardData,
     
     // Marketplace operations
     listCardForSale,
+    createAuction,
     buyCard,
     placeBid,
     cancelListing,
+    endAuction,
     
     // Data retrieval
     getPokemonData,
     getAllListings,
     getListingDetails,
-    getActiveAuctions,
     getOwnedCards,
-    getMarketplaceListings,
+    getAllListedCards,
 
     // Account shorthand
     account: state.wallet?.account || null,
