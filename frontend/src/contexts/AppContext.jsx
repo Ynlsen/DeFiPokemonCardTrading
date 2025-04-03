@@ -392,7 +392,7 @@ export const AppProvider = ({ children }) => {
       console.error(errorMsg, error);
       return false;
     }
-  }, [state.contracts]);
+  }, [state.contracts.tradingContract, state.contracts.tokenContract]);
 
   // Get owned tokens - simplified to avoid using tokenOfOwnerByIndex which doesn't exist
   const getOwnedTokens = useCallback(async (ownerAddress = state.wallet.account) => {
@@ -739,6 +739,28 @@ export const AppProvider = ({ children }) => {
     return results;
   }, [state?.contracts?.tokenContract, state?.contracts?.tradingContract, state?.wallet]);
 
+  // Get pending withdrawals for the current user
+  const getPendingWithdrawals = useCallback(async (address = state.wallet.account) => {
+    if (!state.contracts.tradingContract || !address) {
+      console.warn('Trading contract not available or no account connected.');
+      return '0'; // Return 0 if contract or account is missing
+    }
+    try {
+      const amount = await state.contracts.tradingContract.pendingWithdrawals(address);
+      return amount.toString();
+    } catch (error) {
+      console.error('Failed to get pending withdrawals:', error);
+      return '0';
+    }
+  }, [state.contracts.tradingContract, state.wallet.account]);
+
+  // Withdraw funds
+  const withdrawFunds = useCallback(async () => {
+    return executeTransaction(async () => {
+      return state.contracts.tradingContract.withdraw();
+    }, 'Failed to withdraw funds');
+  }, [state.contracts.tradingContract, executeTransaction]);
+
   // Clean up contextValue export
   const contextValue = {
     // State
@@ -770,6 +792,10 @@ export const AppProvider = ({ children }) => {
     getListingDetails,
     getOwnedCards,
     getAllListedCards,
+
+    // Withdrawal functions
+    getPendingWithdrawals,
+    withdrawFunds,
 
     // Account shorthand
     account: state.wallet?.account || null,
