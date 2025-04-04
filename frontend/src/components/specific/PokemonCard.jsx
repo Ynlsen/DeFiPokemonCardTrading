@@ -7,7 +7,7 @@ import { useApp } from '../../contexts/AppContext';
 /**
  * PokemonCard component - Displays a Pokemon card with data fetched based on tokenId
  */
-const PokemonCard = ({ tokenId, fType = "", compact = false }) => {
+const PokemonCard = ({ tokenId, fType = "" }) => {
   const { getCardData, getListingDetails, getPokemonData } = useApp();
   const [card, setCard] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -98,28 +98,29 @@ const PokemonCard = ({ tokenId, fType = "", compact = false }) => {
           </h3>
         </div>
 
-        {!compact && (
-          <>
-            {/* Types */}
-            {typeIds && typeIds.length > 0 && (
-              <div className="grid grid-cols-2 gap-1 mb-2">
-                {typeIds.map((typeId) => (
-                  <img
-                    src= {`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-viii/sword-shield/${typeId}.png`}
-                    class="rounded-full"
-                  />
-                ))}
-              </div>
-            )}
+        <>
+          {/* Types */}
+          {typeIds && typeIds.length > 0 && (
+            <div className="grid grid-cols-2 gap-1 mb-2">
+              {typeIds.map((typeId) => (
+                <img
+                  src= {`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-viii/sword-shield/${typeId}.png`}
+                  class="rounded-full"
+                />
+              ))}
+            </div>
+          )}
 
-            {/* Owner */}
-            {owner && (
-              <div className="text-sm text-gray-500 mb-1">
-                Owner: {ownerDisplay}
-              </div>
-            )}
-          </>
-        )}
+          {/* Owner / Seller Display */}
+          {(owner || (listing && listing.isActive)) && (
+            <div className="text-sm text-gray-500 mb-1">
+              {listing && listing.isActive 
+                ? `Seller: ${formatAddress(listing.seller)}` 
+                : `Owner: ${ownerDisplay}`
+              }
+            </div>
+          )}
+        </>
 
         {/* Listing Info */}
         {listing && (
