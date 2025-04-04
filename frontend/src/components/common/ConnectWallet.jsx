@@ -5,8 +5,7 @@ import { useApp } from '../../contexts/AppContext';
  * ConnectWallet component - Displays wallet connection status and connect/disconnect buttons
  */
 const ConnectWallet = () => {
-  const { state = {}, connectWallet, disconnectWallet } = useApp() || {};
-  const { account, isConnected, chainId } = state?.wallet || {};
+  const { account, connectWallet, disconnectWallet } = useApp();
 
   // Format address for display (0x1234...5678)
   const formatAddress = (address) => {
@@ -16,7 +15,7 @@ const ConnectWallet = () => {
 
   return (
     <div className="flex items-center">
-      {isConnected && account ? (
+      {account ? (
         <div className="flex items-center space-x-2">
           <span className="hidden md:inline-block text-sm text-gray-600">
             {formatAddress(account)}

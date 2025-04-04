@@ -799,7 +799,6 @@ export const AppProvider = ({ children }) => {
 
     // Account shorthand
     account: state.wallet?.account || null,
-    isConnecting: state.wallet?.isConnecting || false,
 
     // Diagnostics
     runDiagnostics,
