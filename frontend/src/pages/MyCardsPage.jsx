@@ -105,8 +105,8 @@ const MyCardsPage = () => {
 
       {!account ? (
         <EmptyState
+          title = "Wallet Not Connected"
           message="Connect your wallet to view your cards"
-          icon="🔌"
         />
       ) : loadingState ? (
         <div className="text-center py-12">
