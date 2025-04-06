@@ -45,19 +45,14 @@ const HomePage = () => {
 
 
   const fetchFeaturedCards = async () => {
-
     setLoading(true);
-    
     try {
-      
-      // Get cached marketplace listings 
       let listings = await getAllListings();
       
       if (listings && listings.length > 0) {
         // Take random 4
-        listings = listings.sort((a, b) => 0.5 - Math.random())
+        listings = listings.sort(() => 0.5 - Math.random());
         const selectedCards = listings.slice(0, 4);
-          
         setFeaturedCards(selectedCards);
       } else {
         setFeaturedCards([]);
@@ -70,11 +65,15 @@ const HomePage = () => {
     }
   };
 
-
-  // Fetch cards on mount
   useEffect(() => {
-    fetchFeaturedCards();
-  }, []);
+    // Only fetch if account is connected
+    if (account) {
+      fetchFeaturedCards();
+    } else {
+      setFeaturedCards([]);
+      setLoading(false);
+    }
+  }, [account, getAllListings]);
 
   const handleRunDiagnostics = async () => {
     try {
