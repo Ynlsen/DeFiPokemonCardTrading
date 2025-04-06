@@ -31,29 +31,30 @@ const MarketplacePage = () => {
   });
 
 
-  // Fetch listings on mount
+  // Fetch listings when account is available
   useEffect(() => {
-    
     const fetchListings = async () => {
-
-      setLoading(true)
-
+      setLoading(true);
       try {
         const data = await getAllListedCards();
-        
         setListings(data);
-
       } catch (err) {
         console.error('Error fetching marketplace listings:', err);
-        setError('Failed to load marketplace listings. Please try again.');
+        setListings([]); // Clear listings on error
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     };
 
-    fetchListings();
-
-  }, []);
+    // Only fetch if account is connected
+    if (account) {
+      fetchListings();
+    } else {
+      // Clear listings if user disconnects
+      setListings([]);
+      setLoading(false);
+    }
+  }, [account, getAllListedCards]); // Depend on account and the fetch function
 
   // Memoize the filtered listings to prevent unnecessary re-renders
   const filteredListings = useMemo(() => {
