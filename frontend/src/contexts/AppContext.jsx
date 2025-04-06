@@ -679,40 +679,49 @@ export const AppProvider = ({ children }) => {
   }, [getAllListings, getCardData]);
 
 
-  // Get cards owned by the current account - optimized to prevent flickering
+  // Get token IDs owned by the current account
   const getOwnedCards = useCallback(async () => {
+    const ownerAddress = state.wallet.account;
     const isDev = import.meta.env.MODE === 'development';       
 
-    // Return empty array if no account
-    if (!state.wallet.account) {
+    // Return empty array if no account or contract
+    if (!ownerAddress || !state.contracts.tokenContract) {
       return [];
     }
 
     try {
+      const balanceBN = await state.contracts.tokenContract.balanceOf(ownerAddress);
+      const balance = Number(balanceBN);
 
-      // Get balance from token contract
-      const balance = await state.contracts.tokenContract.balanceOf(state.wallet.account);
-      
-      // Missing tokenOfOwnerByIndex function in contract TODO: Implement
-
-      // Filter out null results
-      const validCards = [];
-      
-      if(isDev && validCards.length == 0){
-        return generateMockCards(5);
+      if (balance === 0) {
+        console.log('No owned tokens found. Returning mock IDs.');
+        if(isDev){
+          return [1, 2, 3, 4, 5, 6];
+        }
+        return [];
       }
-      return validCards;
+
+      // Create an array of promises to fetch token IDs
+      const tokenIdPromises = [];
+      for (let i = 0; i < balance; i++) {
+        tokenIdPromises.push(state.contracts.tokenContract.tokenOfOwnerByIndex(ownerAddress, i));
+      }
+      
+      // Resolve all token ID promises
+      const tokenIdsRaw = await Promise.all(tokenIdPromises);
+      const tokenIds = tokenIdsRaw.map(id => Number(id)); 
+      
+      return tokenIds;
+      
     } catch (error) {
-      console.error('Error getting owned cards:', error);
-      
-      // Return mock data in development
+      console.error('Error getting owned token IDs:', error);
       if (isDev) {
-        return generateMockCards(5);
+          console.warn('Error fetching owned token IDs in dev mode. Returning mock IDs.');
+          return [1, 2, 3, 4, 5, 6];
       }
-      
       return [];
     }
-  }, [state.wallet.account, state.contracts.tokenContract, getCardData]);
+  }, [state.wallet.account, state.contracts.tokenContract]);
 
   /**
    * Run diagnostics on the contract connection
@@ -775,7 +784,6 @@ export const AppProvider = ({ children }) => {
     formatAddress,
     
     // Token operations
-    getOwnedTokens,
     getCardData,
     
     // Marketplace operations
