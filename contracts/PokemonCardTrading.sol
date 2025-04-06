@@ -2,6 +2,8 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 import "./PokemonCardToken.sol";
 
 /**
@@ -9,7 +11,7 @@ import "./PokemonCardToken.sol";
  * @dev Trading contract for Pokemon Card NFTs that supports fixed-price sales and auctions
  * Uses escrow to prevent sellers from transferring listed NFTs
  */
-contract PokemonCardTrading is ReentrancyGuard {
+contract PokemonCardTrading is ReentrancyGuard, Pausable, Ownable {
     // Reference to the PokemonCardToken contract
     PokemonCardToken public pokemonCardContract;
     
@@ -46,7 +48,7 @@ contract PokemonCardTrading is ReentrancyGuard {
      * @dev Constructor sets the Pokemon Card NFT contract address
      * @param _pokemonCardContract The address of the Pokemon Card NFT contract
      */
-    constructor(address _pokemonCardContract) {
+    constructor(address _pokemonCardContract) Ownable(msg.sender) {
         pokemonCardContract = PokemonCardToken(_pokemonCardContract);
     }
     
@@ -58,7 +60,7 @@ contract PokemonCardTrading is ReentrancyGuard {
      *         before calling this function
      * @notice This function will transfer the NFT to this contract until it's sold or the listing is cancelled
      */
-    function listCardForSale(uint256 tokenId, uint256 price) external {
+    function listCardForSale(uint256 tokenId, uint256 price) external whenNotPaused {
         require(price != 0, "Price must be greater than zero");
         require(pokemonCardContract.ownerOf(tokenId) == msg.sender, "You must own the card to list it");
         
@@ -103,7 +105,7 @@ contract PokemonCardTrading is ReentrancyGuard {
         uint256 tokenId,
         uint256 startingPrice,
         uint256 duration
-    ) external {
+    ) external whenNotPaused {
         require(startingPrice != 0, "Starting price must be greater than zero");
         require(duration != 0, "Duration must be greater than zero");
         require(pokemonCardContract.ownerOf(tokenId) == msg.sender, "You must own the card to list it");
@@ -142,7 +144,7 @@ contract PokemonCardTrading is ReentrancyGuard {
      * @dev Buys a card that is listed for a fixed price
      * @param tokenId The ID of the token to buy
      */
-    function buyCard(uint256 tokenId) external payable nonReentrant {
+    function buyCard(uint256 tokenId) external payable nonReentrant whenNotPaused {
         Listing storage listing = listings[tokenId];
         
         require(listing.active, "Listing is not active");
@@ -174,7 +176,7 @@ contract PokemonCardTrading is ReentrancyGuard {
      * @dev Places a bid on an auction
      * @param tokenId The ID of the token to bid on
      */
-    function placeBid(uint256 tokenId) external payable nonReentrant {
+    function placeBid(uint256 tokenId) external payable nonReentrant whenNotPaused {
         Listing storage listing = listings[tokenId];
         
         require(listing.active, "Listing is not active");
@@ -198,7 +200,7 @@ contract PokemonCardTrading is ReentrancyGuard {
      * @dev Ends an auction and transfers the token to the highest bidder
      * @param tokenId The ID of the token whose auction to end
      */
-    function endAuction(uint256 tokenId) external nonReentrant {
+    function endAuction(uint256 tokenId) external nonReentrant whenNotPaused {
         Listing storage listing = listings[tokenId];
         
         require(listing.active, "Listing is not active");
@@ -232,7 +234,7 @@ contract PokemonCardTrading is ReentrancyGuard {
      * @dev Cancels a listing
      * @param tokenId The ID of the token whose listing to cancel
      */
-    function cancelListing(uint256 tokenId) external {
+    function cancelListing(uint256 tokenId) external whenNotPaused {
         Listing storage listing = listings[tokenId];
         
         require(listing.active, "Listing is not active");
@@ -256,7 +258,7 @@ contract PokemonCardTrading is ReentrancyGuard {
     /**
      * @dev Withdraws funds from pending withdrawals
      */
-    function withdraw() external nonReentrant {
+    function withdraw() external nonReentrant whenNotPaused {
         uint256 amount = pendingWithdrawals[msg.sender];
         require(amount != 0, "No funds to withdraw");
         
@@ -268,5 +270,14 @@ contract PokemonCardTrading is ReentrancyGuard {
         require(success, "Transfer failed");
         
         emit WithdrawalMade(msg.sender, amount);
+    }
+
+    // The following functions are overrides required by Solidity.
+    function pause() public onlyOwner {
+        _pause();
+    }
+
+    function unpause() public onlyOwner {
+        _unpause();
     }
 } 

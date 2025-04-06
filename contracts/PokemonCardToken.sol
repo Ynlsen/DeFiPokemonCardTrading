@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @title PokemonCardToken
  * @dev ERC721 token for Pokemon cards with metadata for Pokemon ID and rarity
  */
-contract PokemonCardToken is ERC721, Ownable {
+contract PokemonCardToken is ERC721, ERC721Enumerable, Ownable {
     uint256 private _tokenIdCounter;
     
     enum Rarity { COMMON, RARE, EPIC }
@@ -63,5 +64,30 @@ contract PokemonCardToken is ERC721, Ownable {
         require(tokenId < _tokenIdCounter, "Query for nonexistent token");
         PokemonCard storage card = _pokemonCards[tokenId];
         return (card.pokemonId, card.rarity);
+    }
+
+    // The following functions are overrides required by Solidity.
+    function _update(address to, uint256 tokenId, address auth)
+        internal
+        override(ERC721, ERC721Enumerable)
+        returns (address)
+    {
+        return super._update(to, tokenId, auth);
+    }
+
+    function _increaseBalance(address account, uint128 value)
+        internal
+        override(ERC721, ERC721Enumerable)
+    {
+        super._increaseBalance(account, value);
+    }
+
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC721, ERC721Enumerable)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
     }
 } 
