@@ -82,10 +82,23 @@ const CardDetailPage = () => {
     }
   };
   
-  // Load card data on mount
+  // Load card data on mount and when account or contracts change
   useEffect(() => {
-    loadCardData();
-  }, [tokenId]);
+    if (!account) {
+      setCard(null);
+      setLoading(false); 
+      setError('Please connect your wallet to view card details.');
+    } else if (!contracts?.tokenContract || !contracts?.tradingContract) {
+      // Wallet connected, but contracts aren't ready yet
+      setCard(null);
+      setLoading(true); // Keep loading or show initializing state
+      setError(null); // Clear the "connect wallet" error
+    } else if (tokenId) {
+      setError(null);
+      loadCardData();
+    }
+    // Add account and contracts as dependencies
+  }, [tokenId, account, contracts?.tokenContract, contracts?.tradingContract]);
   
   // Handle card purchase
   const handlePurchase = async () => {
