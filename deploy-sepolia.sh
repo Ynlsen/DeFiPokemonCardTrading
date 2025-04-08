@@ -11,8 +11,6 @@ BLUE="\e[34m"
 RED="\e[31m"
 ENDCOLOR="\e[0m"
 
-# Default Sepolia RPC URL - public Infura endpoint
-DEFAULT_RPC_URL="https://sepolia.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"
 
 echo -e "${BOLD}${GREEN}Pokemon Card Trading dApp - Sepolia Testnet Deployment${ENDCOLOR}"
 echo -e "${YELLOW}This script will deploy contracts to Sepolia testnet${ENDCOLOR}"
@@ -24,116 +22,86 @@ handle_error() {
   exit 1
 }
 
-# Check for private key and RPC URL
-if [ ! -f ".env" ]; then
-  echo -e "${YELLOW}Environment file not found. Setting up deployment configuration...${ENDCOLOR}"
-  
-  # Ask for private key directly
-  echo -e "${YELLOW}Please enter your Ethereum private key for deployment to Sepolia:${ENDCOLOR}"
-  read -p "> " PRIVATE_KEY
-  
+# --- Environment Setup --- 
+PRIVATE_KEY=""
+SEPOLIA_RPC_URL=""
+ETHERSCAN_API_KEY=""
+
+# Check if .env exists and load variables
+if [ -f ".env" ]; then
+  echo -e "${BLUE}Loading configuration from .env file...${ENDCOLOR}"
+  # Use grep and cut safely, handling cases where variable might not exist
+  PRIVATE_KEY=$(grep '^PRIVATE_KEY=' .env | cut -d '=' -f2)
+  SEPOLIA_RPC_URL=$(grep '^SEPOLIA_RPC_URL=' .env | cut -d '=' -f2)
+  ETHERSCAN_API_KEY=$(grep '^ETHERSCAN_API_KEY=' .env | cut -d '=' -f2)
+fi
+
+# --- Validate/Prompt for Private Key --- 
+if [ -z "$PRIVATE_KEY" ] || [ "$PRIVATE_KEY" = "your-private-key" ]; then
+  echo -e "${YELLOW}Ethereum Private Key for deployment not found or is default.${ENDCOLOR}"
+  echo -e "${YELLOW}Please enter the private key of the account you want to deploy from:${ENDCOLOR}"
+  read -sp "> " PRIVATE_KEY # Use -s for secure input
+  echo # Add a newline after secure input
   if [ -z "$PRIVATE_KEY" ]; then
-    handle_error "Private key is required for deployment"
+    handle_error "Private key is required for deployment."
   fi
-  
-  # Ask if they want to use default RPC or provide their own
-  echo -e "${YELLOW}Use default Sepolia RPC URL (public Infura endpoint)? (y/n)${ENDCOLOR}"
-  read -p "> " USE_DEFAULT_RPC
-  
-  if [[ $USE_DEFAULT_RPC =~ ^[Yy]$ ]] || [ -z "$USE_DEFAULT_RPC" ]; then
-    SEPOLIA_RPC_URL=$DEFAULT_RPC_URL
-    echo -e "${GREEN}Using default Sepolia RPC URL${ENDCOLOR}"
+  # Update .env or create if needed
+  if grep -q "^PRIVATE_KEY=" .env 2>/dev/null; then
+    sed -i "s|^PRIVATE_KEY=.*|PRIVATE_KEY=$PRIVATE_KEY|" .env
   else
-    echo -e "${YELLOW}Please enter your Sepolia RPC URL:${ENDCOLOR}"
-    read -p "> " SEPOLIA_RPC_URL
-    
-    if [ -z "$SEPOLIA_RPC_URL" ]; then
-      echo -e "${YELLOW}No RPC URL provided, using default${ENDCOLOR}"
-      SEPOLIA_RPC_URL=$DEFAULT_RPC_URL
-    fi
+    echo "PRIVATE_KEY=$PRIVATE_KEY" >> .env
   fi
-  
-  # Create new .env file
-  cat > .env << EOL
-SEPOLIA_RPC_URL=$SEPOLIA_RPC_URL
-PRIVATE_KEY=$PRIVATE_KEY
-EOL
-  echo -e "${GREEN}Created .env file with deployment configuration${ENDCOLOR}"
-else
-  # .env exists, check for required values
-  SEPOLIA_RPC_URL=$(grep SEPOLIA_RPC_URL .env | cut -d '=' -f2)
-  PRIVATE_KEY=$(grep PRIVATE_KEY .env | cut -d '=' -f2)
-  
-  # Check private key
-  if [ -z "$PRIVATE_KEY" ] || [ "$PRIVATE_KEY" = "your-private-key" ]; then
-    echo -e "${YELLOW}Private key not found in .env file${ENDCOLOR}"
-    echo -e "${YELLOW}Please enter your Ethereum private key for deployment to Sepolia:${ENDCOLOR}"
-    read -p "> " PRIVATE_KEY
-    
-    if [ -z "$PRIVATE_KEY" ]; then
-      handle_error "Private key is required for deployment"
-    fi
-    
-    # Update private key in .env
-    if grep -q "PRIVATE_KEY=" .env; then
-      sed -i "s/PRIVATE_KEY=.*/PRIVATE_KEY=$PRIVATE_KEY/" .env
-    else
-      echo "PRIVATE_KEY=$PRIVATE_KEY" >> .env
-    fi
-  fi
-  
-  # Check RPC URL
-  if [ -z "$SEPOLIA_RPC_URL" ] || [ "$SEPOLIA_RPC_URL" = "your-sepolia-rpc-url" ]; then
-    echo -e "${YELLOW}Sepolia RPC URL not found in .env file${ENDCOLOR}"
-    echo -e "${YELLOW}Use default Sepolia RPC URL (public Infura endpoint)? (y/n)${ENDCOLOR}"
-    read -p "> " USE_DEFAULT_RPC
-    
-    if [[ $USE_DEFAULT_RPC =~ ^[Yy]$ ]] || [ -z "$USE_DEFAULT_RPC" ]; then
-      SEPOLIA_RPC_URL=$DEFAULT_RPC_URL
-      echo -e "${GREEN}Using default Sepolia RPC URL${ENDCOLOR}"
-    else
-      echo -e "${YELLOW}Please enter your Sepolia RPC URL:${ENDCOLOR}"
-      read -p "> " SEPOLIA_RPC_URL
-      
-      if [ -z "$SEPOLIA_RPC_URL" ]; then
-        echo -e "${YELLOW}No RPC URL provided, using default${ENDCOLOR}"
-        SEPOLIA_RPC_URL=$DEFAULT_RPC_URL
-      fi
-    fi
-    
-    # Update RPC URL in .env
-    if grep -q "SEPOLIA_RPC_URL=" .env; then
-      sed -i "s/SEPOLIA_RPC_URL=.*/SEPOLIA_RPC_URL=$SEPOLIA_RPC_URL/" .env
-    else
-      echo "SEPOLIA_RPC_URL=$SEPOLIA_RPC_URL" >> .env
-    fi
-  fi
+  echo -e "${GREEN}Private Key saved/updated in .env${ENDCOLOR}"
 fi
 
-echo -e "${GREEN}Using Sepolia RPC URL: ${SEPOLIA_RPC_URL}${ENDCOLOR}"
+# --- Validate/Prompt for Sepolia RPC URL --- 
+if [ -z "$SEPOLIA_RPC_URL" ] || [[ "$SEPOLIA_RPC_URL" == *"your-sepolia-rpc-url"* ]]; then # Check for placeholder too
+  echo -e "${YELLOW}Sepolia RPC URL not found or is default.${ENDCOLOR}"
+  echo -e "${YELLOW}An RPC URL is required to connect to the Sepolia network for deployment."
+  echo -e "${YELLOW}You can get one for free from services like Infura (infura.io) or Alchemy (alchemy.com)."
+  echo -e "${YELLOW}Please enter your full Sepolia RPC URL (e.g., https://sepolia.infura.io/v3/YOUR_API_KEY):${ENDCOLOR}"
+  read -p "> " SEPOLIA_RPC_URL
+  if [ -z "$SEPOLIA_RPC_URL" ]; then
+    handle_error "Sepolia RPC URL is required for deployment."
+  fi
+  # Update .env or create if needed
+  if grep -q "^SEPOLIA_RPC_URL=" .env 2>/dev/null; then
+    sed -i "s|^SEPOLIA_RPC_URL=.*|SEPOLIA_RPC_URL=$SEPOLIA_RPC_URL|" .env
+  else
+    echo "SEPOLIA_RPC_URL=$SEPOLIA_RPC_URL" >> .env
+  fi
+  echo -e "${GREEN}Sepolia RPC URL saved/updated in .env${ENDCOLOR}"
+fi
 
-# Check for Etherscan API key - ask user if it's not present or is the default
-ETHERSCAN_API_KEY=$(grep ETHERSCAN_API_KEY .env | cut -d '=' -f2)
+echo -e "${BLUE}Using Sepolia RPC URL: ${SEPOLIA_RPC_URL}${ENDCOLOR}"
+
+# --- Validate/Prompt for Etherscan API Key (Optional Verification) --- 
 if [ -z "$ETHERSCAN_API_KEY" ] || [ "$ETHERSCAN_API_KEY" = "your-etherscan-api-key" ]; then
-  echo -e "${YELLOW}Would you like to verify your contracts on Etherscan? (y/n)${ENDCOLOR}"
+  echo -e "${YELLOW}Etherscan API Key not found or is default.${ENDCOLOR}"
+  echo -e "${YELLOW}Do you want to attempt contract verification on Sepolia Etherscan? (Requires an API Key) (y/n)${ENDCOLOR}"
   read -p "> " VERIFY_CHOICE
-  
   if [[ $VERIFY_CHOICE =~ ^[Yy]$ ]]; then
-    read -p "Enter your Etherscan API key: " ETHERSCAN_API_KEY
-    
-    # Update the .env file with the new API key
-    if grep -q "ETHERSCAN_API_KEY" .env; then
-      sed -i "s/ETHERSCAN_API_KEY=.*/ETHERSCAN_API_KEY=$ETHERSCAN_API_KEY/" .env
+    echo -e "${YELLOW}Please enter your Etherscan API Key:${ENDCOLOR}"
+    read -p "> " ETHERSCAN_API_KEY
+    if [ -z "$ETHERSCAN_API_KEY" ]; then
+       echo -e "${YELLOW}No Etherscan API Key provided. Skipping verification.${ENDCOLOR}"
+       ETHERSCAN_API_KEY="" # Ensure it's empty if user provided nothing
     else
-      echo "ETHERSCAN_API_KEY=$ETHERSCAN_API_KEY" >> .env
+        # Update .env or create if needed
+        if grep -q "^ETHERSCAN_API_KEY=" .env 2>/dev/null; then
+            sed -i "s|^ETHERSCAN_API_KEY=.*|ETHERSCAN_API_KEY=$ETHERSCAN_API_KEY|" .env
+        else
+            echo "ETHERSCAN_API_KEY=$ETHERSCAN_API_KEY" >> .env
+        fi
+        echo -e "${GREEN}Etherscan API Key saved/updated in .env${ENDCOLOR}"
     fi
-    
-    echo -e "${GREEN}Etherscan API key saved to .env${ENDCOLOR}"
   else
-    echo -e "${YELLOW}Skipping contract verification${ENDCOLOR}"
-    ETHERSCAN_API_KEY=""
+    echo -e "${YELLOW}Skipping Etherscan verification setup.${ENDCOLOR}"
+    ETHERSCAN_API_KEY="" # Ensure it's empty if skipping
   fi
 fi
+
+# --- Deployment Steps --- 
 
 # Check dependencies
 echo -e "${BLUE}Checking project dependencies...${ENDCOLOR}"
