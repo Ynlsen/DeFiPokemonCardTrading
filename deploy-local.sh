@@ -131,6 +131,7 @@ echo -e "${YELLOW}Run test scripts to interact with contracts:${ENDCOLOR}"
 echo -e "${BLUE}   npx hardhat run test/mint-test.js --network localhost${ENDCOLOR}"
 echo -e "${BLUE}   npx hardhat run test/fixed-price-test.js --network localhost${ENDCOLOR}"
 echo -e "${BLUE}   npx hardhat run test/auction-test.js --network localhost${ENDCOLOR}"
+echo -e "${BLUE}   npx hardhat run test/listing-test.js --network localhost${ENDCOLOR}"
 echo -e "${BLUE}   npx hardhat run test/comprehensive-test.js --network localhost${ENDCOLOR}"
 
 echo -e "${YELLOW}Or import one of the test accounts into your wallet (very useful for testing the frontend) using:${ENDCOLOR}"

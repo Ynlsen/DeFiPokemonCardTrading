@@ -216,10 +216,11 @@ DeFiPokemonCardTrading/
 
 After deploying the contracts locally, you can execute test scripts that will check all the functionalities of the contracts. (If the frontend is running, you can directly view the cards and listings that are created by them)
 
-```
+```bash
 npx hardhat run test/mint-test.js --network localhost
 npx hardhat run test/fixed-price-test.js --network localhost
 npx hardhat run test/auction-test.js --network localhost
+npx hardhat run test/listing-test.js --network localhost
 npx hardhat run test/comprehensive-test.js --network localhost
 ```
 
