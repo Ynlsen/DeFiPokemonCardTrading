@@ -40,7 +40,7 @@ fi
 if [ -z "$PRIVATE_KEY" ] || [ "$PRIVATE_KEY" = "your-private-key" ]; then
   echo -e "${YELLOW}Ethereum Private Key for deployment not found or is default.${ENDCOLOR}"
   echo -e "${YELLOW}Please enter the private key of the account you want to deploy from:${ENDCOLOR}"
-  read -sp "> " PRIVATE_KEY # Use -s for secure input
+  read -p "> " PRIVATE_KEY
   echo # Add a newline after secure input
   if [ -z "$PRIVATE_KEY" ]; then
     handle_error "Private key is required for deployment."
