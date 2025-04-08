@@ -1,4 +1,3 @@
-// test/fixed-price-test.js
 // Example test script showing how to interact with the deployed Pokemon Card contracts
 // with fixed price listing, sale, and withdrawal
 
@@ -197,6 +196,20 @@ async function main() {
     console.log("\nFinal ETH balances:");
     console.log(`- User1 (Seller): ${ethers.utils.formatEther(await ethers.provider.getBalance(user1.address))} ETH`);
     console.log(`- User2 (Buyer): ${ethers.utils.formatEther(await ethers.provider.getBalance(user2.address))} ETH`);
+    
+    // Final cleanup withdrawal attempt for seller
+    console.log("\nAttempting final cleanup withdrawal for User1 (Seller)...");
+    try {
+      const finalWithdrawTx = await trading.connect(user1).withdraw();
+      await finalWithdrawTx.wait();
+      console.log("   - Final withdrawal for User1 successful (funds might have been present).");
+    } catch (e) {
+      if (e.message.includes("No funds to withdraw")) {
+        console.log("   - User1 had no additional funds to withdraw (as expected).");
+      } else {
+        console.error("   - Error during final User1 withdrawal:", e.message);
+      }
+    }
     
     console.log("\n✅ Fixed price test complete! Your Pokemon Card Trading platform is working correctly.");
     

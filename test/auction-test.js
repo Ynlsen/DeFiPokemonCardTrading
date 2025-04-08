@@ -1,4 +1,3 @@
-// test/auction-test.js
 // Test script for Pokemon Card auction functionality and fund withdrawals
 
 const { ethers } = require("hardhat");
@@ -183,6 +182,24 @@ async function main() {
     }
     
     console.log("\n✅ Auction and withdrawal test complete!");
+
+    // Final cleanup withdrawal attempts
+    console.log("\nAttempting final cleanup withdrawals...");
+    const accountsToClean = [seller, bidder1, bidder2];
+    for (const account of accountsToClean) {
+      try {
+        console.log(`   - Checking ${account.address}...`);
+        const finalWithdrawTx = await trading.connect(account).withdraw();
+        await finalWithdrawTx.wait();
+        console.log(`     - Final withdrawal successful for ${account.address} (funds might have been present).`);
+      } catch (e) {
+        if (e.message.includes("No funds to withdraw")) {
+          console.log(`     - ${account.address} had no additional funds to withdraw (as expected).`);
+        } else {
+          console.error(`     - Error during final withdrawal for ${account.address}:`, e.message);
+        }
+      }
+    }
     
   } catch (error) {
     console.error("Error during auction test:", error);
