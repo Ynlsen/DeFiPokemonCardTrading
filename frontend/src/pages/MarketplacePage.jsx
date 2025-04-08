@@ -80,7 +80,7 @@ const MarketplacePage = () => {
       }
       
       // Apply price filter
-      const price = parseFloat(formatEth(Math.max(card.listing.highestBid, card.listing.price)));
+      const price = parseFloat(Math.max(card.listing.highestBid, card.listing.price));
       
       if (filters.minPrice && price < parseFloat(filters.minPrice)) {
         return false;
