@@ -15,8 +15,6 @@ const PokemonCard = ({ tokenId, fType = "" }) => {
   // Fetch all card data when tokenId changes
   useEffect(() => {
     const fetchCardData = async () => {
-      if (!tokenId) return;
-      
       setLoading(true);
       try {
         // Get basic card data from smart contract (pokemonId, rarity, owner)
@@ -123,10 +121,10 @@ const PokemonCard = ({ tokenId, fType = "" }) => {
         </>
 
         {/* Listing Info */}
-        {listing && (
+        {listing.isActive && (
           <div className="mt-2 flex justify-between items-center">
             <span className="text-sm font-medium">
-              {isAuction ? 'Current Bid' : 'Price'}:
+              {isAuction ? 'Bid' : 'Price'}:
             </span>
             <span className="font-bold text-indigo-600">
               {priceDisplay}
