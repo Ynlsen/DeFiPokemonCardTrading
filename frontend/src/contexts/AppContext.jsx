@@ -493,9 +493,8 @@ export const AppProvider = ({ children }) => {
     const isDev = import.meta.env.MODE === 'development';
     
     try {
-      // TODO test performance for larger numbers!
-      // For production, check 20 token IDs and see which ones are listed
-      const maxTokensToCheck = 20;
+      // In production, check 10000 token IDs for listings to prevent performance issues.
+      const maxTokensToCheck = 10000;
       const listedTokenIds = [];
       
       for (let i = 0; i < maxTokensToCheck; i++) {
