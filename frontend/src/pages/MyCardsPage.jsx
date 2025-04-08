@@ -53,10 +53,10 @@ const MyCardsPage = () => {
   }, [account, contracts?.tradingContract]);
 
   useEffect(() => {
-    if (account) {
+    if (account && contracts?.tokenContract) {
       fetchCards();
     }
-  }, [account]);
+  }, [account, contracts?.tokenContract]);
 
   const handleWithdraw = async () => {
     setIsWithdrawing(true);
