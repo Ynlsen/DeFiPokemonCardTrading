@@ -44,6 +44,12 @@ npm run deploy:local
 
 ### Automatic Sepolia Testnet Contract Deployment
 
+**Prerequisites:**
+
+*   **RPC URL:** You need an RPC URL for the Sepolia testnet from a provider like [Infura](https://infura.io/) or [Alchemy](https://www.alchemy.com/). The script will prompt you for this.
+*   **Private Key:** A wallet private key with sufficient Sepolia ETH to cover deployment gas fees. The script will prompt you for this.
+*   **Etherscan API Key (Optional):** For automatic contract verification on Etherscan, you'll need an API key from [Etherscan](https://etherscan.io/). The script will prompt for this, but you can skip it.
+
 #### For Linux:
 
 ```bash
