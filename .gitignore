@@ -3,4 +3,5 @@ dist
 cache
 artifacts
 .env
-package-lock
+package-lock.json
+hardhat_node.log
