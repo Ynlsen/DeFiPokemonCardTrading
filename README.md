@@ -240,7 +240,7 @@ The application includes development features to help test and debug:
 
 - **Mock Data**: Provides fallback data when contract calls fail.
 - **Contract Status Indicator**: Displays connection status on the HomePage.
-- **Diagnostic Tools**: Built-in troubleshooting tools accessible from the HomePage$.
+- **Diagnostic Tools**: Built-in troubleshooting tools accessible from the HomePage.
 
 To use development mode:
 
