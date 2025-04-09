@@ -290,3 +290,7 @@ npx hardhat verify --network sepolia YOUR_TRADING_ADDRESS YOUR_TOKEN_ADDRESS
 - **Blockchain Interaction**: ethers.js v6
 - **External Data**: PokeAPI
 
+## Acknowledgements
+
+As encouraged by the coursework, GenAI tools were utilized in the development of this project. Specifically, Google's Gemini 2.5 and Anthropic's Claude 3.7 provided valuable assistance. Special thanks for their help with coding the deployment scripts, their assistance in building and designing the frontend, and their input on documentation and adherence to Solidity style guides.
+
