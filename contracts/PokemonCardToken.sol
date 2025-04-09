@@ -27,7 +27,7 @@ contract PokemonCardToken is ERC721, ERC721Enumerable, Ownable {
     
     constructor() ERC721("PokemonCardNFT", "PKMN") Ownable(msg.sender) {}
 
-    // --- External / Public Functions ---
+    // External functions
 
     /**
      * @notice Mints a new Pokemon card NFT to a specified address.
@@ -41,7 +41,7 @@ contract PokemonCardToken is ERC721, ERC721Enumerable, Ownable {
         address to,
         uint8 pokemonId,
         Rarity rarity
-    ) public onlyOwner returns (uint256) {
+    ) external onlyOwner returns (uint256) {
         uint256 newTokenId = _tokenIdCounter;
         _tokenIdCounter++;
 
@@ -56,7 +56,7 @@ contract PokemonCardToken is ERC721, ERC721Enumerable, Ownable {
         return newTokenId;
     }
 
-    // --- View Functions ---
+    // External view functions
 
     /**
      * @notice Gets the Pokemon ID and rarity for a specific token ID.
@@ -65,7 +65,7 @@ contract PokemonCardToken is ERC721, ERC721Enumerable, Ownable {
      * @return pokemonId The Pokemon ID (1-151).
      * @return rarity The rarity level (COMMON, RARE, EPIC).
      */
-    function getPokemonCard(uint256 tokenId) public view returns (uint8 pokemonId, Rarity rarity) {
+    function getPokemonCard(uint256 tokenId) external view returns (uint8 pokemonId, Rarity rarity) {
         require(tokenId < _tokenIdCounter, "Query for nonexistent token");
         PokemonCard storage card = _pokemonCards[tokenId];
         return (card.pokemonId, card.rarity);
