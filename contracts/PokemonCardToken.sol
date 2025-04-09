@@ -7,33 +7,35 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @title PokemonCardToken
- * @dev ERC721 token for Pokemon cards with metadata for Pokemon ID and rarity
+ * @dev ERC721 token for Pokemon cards with metadata for Pokemon ID and rarity.
  */
 contract PokemonCardToken is ERC721, ERC721Enumerable, Ownable {
-    uint256 private _tokenIdCounter;
-    
+    // Type Declarations
     enum Rarity { COMMON, RARE, EPIC }
-    
-    // Pokemon Card struct to store data
+
     struct PokemonCard {
         uint8 pokemonId;  // Pokemon ID (1-151 from Gen 1)
         Rarity rarity;    // Card rarity level
     }
-    
-    // Mapping from token ID to Pokemon Card data
+
+    // State Variables
+    uint256 private _tokenIdCounter;
     mapping(uint256 => PokemonCard) private _pokemonCards;
-    
+
     // Events
     event PokemonCardMinted(uint256 tokenId, uint8 pokemonId, Rarity rarity, address owner);
     
     constructor() ERC721("PokemonCardNFT", "PKMN") Ownable(msg.sender) {}
-    
+
+    // --- External / Public Functions ---
+
     /**
-     * @dev Mints a new Pokemon card
-     * @param to Address to mint the token to
-     * @param pokemonId ID of the Pokemon (1-151)
-     * @param rarity Rarity level of the card
-     * @return The ID of the newly minted token
+     * @notice Mints a new Pokemon card NFT to a specified address.
+     * @dev Creates a new token with associated Pokemon data. Only callable by the owner.
+     * @param to Address to mint the token to.
+     * @param pokemonId ID of the Pokemon (1-151).
+     * @param rarity Rarity level of the card (COMMON, RARE, EPIC).
+     * @return The ID of the newly minted token.
      */
     function mintPokemonCard(
         address to,
@@ -41,24 +43,27 @@ contract PokemonCardToken is ERC721, ERC721Enumerable, Ownable {
         Rarity rarity
     ) public onlyOwner returns (uint256) {
         uint256 newTokenId = _tokenIdCounter;
-        _tokenIdCounter ++;
+        _tokenIdCounter++;
 
         // Create the Pokemon Card data
         _pokemonCards[newTokenId] = PokemonCard(pokemonId, rarity);
-        
+
         // Mint the NFT
         _mint(to, newTokenId);
-        
+
         emit PokemonCardMinted(newTokenId, pokemonId, rarity, to);
-        
+
         return newTokenId;
     }
 
+    // --- View Functions ---
+
     /**
-     * @dev Gets the data for a Pokemon card
-     * @param tokenId The ID of the token
-     * @return pokemonId The Pokemon ID
-     * @return rarity The rarity level
+     * @notice Gets the Pokemon ID and rarity for a specific token ID.
+     * @dev Retrieves card data from storage. Reverts if the token ID does not exist.
+     * @param tokenId The ID of the token to query.
+     * @return pokemonId The Pokemon ID (1-151).
+     * @return rarity The rarity level (COMMON, RARE, EPIC).
      */
     function getPokemonCard(uint256 tokenId) public view returns (uint8 pokemonId, Rarity rarity) {
         require(tokenId < _tokenIdCounter, "Query for nonexistent token");
@@ -67,6 +72,16 @@ contract PokemonCardToken is ERC721, ERC721Enumerable, Ownable {
     }
 
     // The following functions are overrides required by Solidity.
+
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC721, ERC721Enumerable)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
+    }
+    
     function _update(address to, uint256 tokenId, address auth)
         internal
         override(ERC721, ERC721Enumerable)
@@ -80,14 +95,5 @@ contract PokemonCardToken is ERC721, ERC721Enumerable, Ownable {
         override(ERC721, ERC721Enumerable)
     {
         super._increaseBalance(account, value);
-    }
-
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        override(ERC721, ERC721Enumerable)
-        returns (bool)
-    {
-        return super.supportsInterface(interfaceId);
     }
 } 
