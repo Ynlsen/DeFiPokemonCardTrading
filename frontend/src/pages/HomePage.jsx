@@ -87,7 +87,7 @@ const HomePage = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-center mb-8">
+      <h1 className="text-2xl md:text-3xl font-bold text-center mb-8">
         Pokemon Card Trading dApp
       </h1>
       
@@ -115,7 +115,7 @@ const HomePage = () => {
       {/* Contract status indicator */}
       {account && isDev && (
         <div className="bg-gray-100 p-4 mb-6 rounded shadow-sm">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 md:gap-0">
             <div className="flex items-center">
               <span className="font-medium mr-2">Contract status:</span>
               {contracts.tokenContract ? (
@@ -135,7 +135,7 @@ const HomePage = () => {
             </div>
             <button
               onClick={handleRunDiagnostics}
-              className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition"
+              className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition w-full md:w-auto"
             >
               Run Diagnostics
             </button>
@@ -168,8 +168,8 @@ const HomePage = () => {
         <>
           {/* Hero Section */}
           <section className="text-center py-12 mb-16">
-            <h1 className="text-4xl font-bold mb-4">Crypto Pokémon Card Trading</h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            <h1 className="text-3xl md:text-4xl font-bold mb-4">Crypto Pokémon Card Trading</h1>
+            <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
               Collect, trade, and sell unique Pokémon cards on the blockchain with secure ownership and transparent transactions.
             </p>
             
@@ -215,7 +215,7 @@ const HomePage = () => {
           {/* Features Section */}
           <section className="mb-16">
             <h2 className="text-2xl font-bold mb-6 text-center">Why Crypto Pokémon Cards?</h2>
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <FeatureItem 
                 icon="🔍"
                 title="Unique Cards"
@@ -243,28 +243,28 @@ const HomePage = () => {
                   <span className="flex-shrink-0 flex items-center justify-center w-8 h-8 bg-indigo-600 text-white rounded-full mr-3">1</span>
                   <div>
                     <h3 className="font-semibold">Connect Your Wallet</h3>
-                    <p className="text-gray-600">Link your Ethereum wallet to start collecting and trading cards.</p>
+                    <p className="text-gray-600 text-sm md:text-base">Link your Ethereum wallet to start collecting and trading cards.</p>
                   </div>
                 </li>
                 <li className="flex items-start">
                   <span className="flex-shrink-0 flex items-center justify-center w-8 h-8 bg-indigo-600 text-white rounded-full mr-3">2</span>
                   <div>
                     <h3 className="font-semibold">Browse the Marketplace</h3>
-                    <p className="text-gray-600">Explore available cards or filter by rarity, price, and type.</p>
+                    <p className="text-gray-600 text-sm md:text-base">Explore available cards or filter by rarity, price, and type.</p>
                   </div>
                 </li>
                 <li className="flex items-start">
                   <span className="flex-shrink-0 flex items-center justify-center w-8 h-8 bg-indigo-600 text-white rounded-full mr-3">3</span>
                   <div>
                     <h3 className="font-semibold">Buy or Bid on Cards</h3>
-                    <p className="text-gray-600">Purchase cards directly or participate in auctions.</p>
+                    <p className="text-gray-600 text-sm md:text-base">Purchase cards directly or participate in auctions.</p>
                   </div>
                 </li>
                 <li className="flex items-start">
                   <span className="flex-shrink-0 flex items-center justify-center w-8 h-8 bg-indigo-600 text-white rounded-full mr-3">4</span>
                   <div>
                     <h3 className="font-semibold">Manage Your Collection</h3>
-                    <p className="text-gray-600">View, list, or auction your owned cards in your personal collection.</p>
+                    <p className="text-gray-600 text-sm md:text-base">View, list, or auction your owned cards in your personal collection.</p>
                   </div>
                 </li>
               </ol>

@@ -84,17 +84,18 @@ const MyCardsPage = () => {
         description="View and manage your collection"
         action={
           account && (
-            <div className="flex items-center space-x-4">
-              <div>
-                <p className="text-xs text-gray-500 text-right">Available:</p>
-                <p className="text-sm font-semibold text-right">{formatEth(pendingWithdrawalAmount)}</p>
-                {withdrawError && <p className="text-xs text-red-500 mt-1 text-right">{withdrawError}</p>} 
+            <div className="flex flex-col md:flex-row md:items-center md:space-x-4 gap-2 md:gap-0">
+              <div className="text-left md:text-right">
+                <p className="text-xs text-gray-500">Available:</p>
+                <p className="text-sm font-semibold">{formatEth(pendingWithdrawalAmount)}</p>
+                {withdrawError && <p className="text-xs text-red-500 mt-1">{withdrawError}</p>} 
               </div>
               <Button 
                 onClick={handleWithdraw}
                 disabled={isWithdrawing || pendingWithdrawalAmount === '0' || !pendingWithdrawalAmount}
                 variant="secondary"
                 size="sm"
+                className="w-full md:w-auto"
               >
                 {isWithdrawing ? 'Withdrawing...' : 'Withdraw'}
               </Button>
@@ -121,7 +122,7 @@ const MyCardsPage = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {cards.map(card => (
-            <PokemonCard tokenId={card} />
+            <PokemonCard key={card} tokenId={card} />
           ))}
         </div>
       )}
