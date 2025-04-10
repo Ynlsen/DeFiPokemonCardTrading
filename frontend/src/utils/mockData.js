@@ -1,10 +1,4 @@
-/**
- * Mock data utilities for development and testing purposes
- * This helps provide a fallback when contract data is unavailable
- */
-
 import { ethers } from 'ethers';
-import { getPokemonImageUrl } from './getPokemonImageUrl';
 
 
 // Module-level cache to maintain consistent mock data across renders
@@ -52,18 +46,6 @@ export const generateMockCard = (tokenId) => {
 };
 
 /**
- * Generate multiple mock cards
- * @param {number} count - Number of cards to generate
- * @returns {Array} Array of mock cards
- */
-export const generateMockCards = (count = 10) => {
-  return Array.from({ length: count }, (_, index) => {
-    const tokenId = index + 1;
-    return STABLE_MOCK_CACHE.getForTokenId(tokenId);
-  });
-};
-
-/**
  * Generate a mock listing for a token
  * @param {number} tokenId - Token ID to generate listing for
  * @returns {Object} Mock listing data
@@ -98,6 +80,5 @@ export const generateMockListing = (tokenId) => {
 // Export functions
 export default {
   generateMockCard,
-  generateMockCards,
   generateMockListing
 }; 

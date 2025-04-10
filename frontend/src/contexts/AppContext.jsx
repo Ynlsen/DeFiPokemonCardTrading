@@ -1,9 +1,8 @@
 import React, { createContext, useReducer, useEffect, useCallback, useContext } from 'react';
 import { ethers } from 'ethers';
 import { produce } from 'immer';
-import { generateMockCards, generateMockCard } from '../utils/mockData';
+import { generateMockCard } from '../utils/mockData';
 import { runContractDiagnostics, formatDiagnosticResults } from '../utils/diagnostics';
-import { wrapContractWithFallbacks } from '../utils/contractWrapper';
 
 // Import ABIs and contract addresses
 import PokemonCardTokenABI from '../contracts/PokemonCardToken.json';
@@ -15,16 +14,10 @@ const AppContext = createContext({
     account: null,
     chainId: null,
     networkName: null,
-    isConnecting: false
   },
   contracts: {
     tokenContract: null,
     tradingContract: null
-  },
-  pokemonData: {
-    data: {},
-    loading: {},
-    errors: {}
   },
   init: () => {},
   connectWallet: () => {},
@@ -39,23 +32,16 @@ const initialState = {
     account: null,
     chainId: null,
     networkName: null,
-    isConnecting: false
   },
   contracts: {
     tokenContract: null,
     tradingContract: null
-  },
-  pokemonData: {
-    data: {},
-    loading: {},
-    errors: {}
   }
 };
 
 // Action types for state updates
 const actions = {
   wallet: {
-    CONNECT_START: 'wallet/connect-start',
     CONNECT_SUCCESS: 'wallet/connect-success',
     CONNECT_ERROR: 'wallet/connect-error',
     DISCONNECT: 'wallet/disconnect',
@@ -67,31 +53,19 @@ const actions = {
     INIT_ERROR: 'contracts/init-error',
     UPDATE: 'contracts/update'
   },
-  pokemon: {
-    FETCH_START: 'pokemon/fetch-start',
-    FETCH_SUCCESS: 'pokemon/fetch-success',
-    FETCH_ERROR: 'pokemon/fetch-error'
-  }
 };
 
 // Reducer function for handling state updates
 const appReducer = (state, action) => {
   switch (action.type) {
     // Wallet actions
-    case actions.wallet.CONNECT_START:
-      return produce(state, draft => {
-        draft.wallet.isConnecting = true;
-      });
-      
     case actions.wallet.CONNECT_SUCCESS:
       return produce(state, draft => {
         Object.assign(draft.wallet, action.payload);
-        draft.wallet.isConnecting = false;
       });
       
     case actions.wallet.CONNECT_ERROR:
       return produce(state, draft => {
-        draft.wallet.isConnecting = false;
         draft.wallet.error = action.payload;
       });
       
@@ -133,26 +107,6 @@ const appReducer = (state, action) => {
         Object.assign(draft.contracts, action.payload);
       });
       
-    // Pokemon data actions
-    case actions.pokemon.FETCH_START:
-      return produce(state, draft => {
-        draft.pokemonData.loading[action.payload] = true;
-        draft.pokemonData.errors[action.payload] = null;
-      });
-      
-    case actions.pokemon.FETCH_SUCCESS:
-      return produce(state, draft => {
-        draft.pokemonData.data[action.payload.id] = action.payload.data;
-        draft.pokemonData.loading[action.payload.id] = false;
-        draft.pokemonData.errors[action.payload.id] = null;
-      });
-      
-    case actions.pokemon.FETCH_ERROR:
-      return produce(state, draft => {
-        draft.pokemonData.loading[action.payload.id] = false;
-        draft.pokemonData.errors[action.payload.id] = action.payload.error;
-      });
-      
     default:
       return state;
   }
@@ -174,6 +128,7 @@ export const AppProvider = ({ children }) => {
       42: 'Kovan Testnet',
       56: 'Binance Smart Chain',
       137: 'Polygon Mainnet',
+      31337: 'Hardhat Network',
       80001: 'Polygon Mumbai',
       11155111: 'Sepolia'
     };
@@ -199,24 +154,20 @@ export const AppProvider = ({ children }) => {
       const tokenContract = new ethers.Contract(tokenAddress, tokenAbi, signer);
       const tradingContract = new ethers.Contract(tradingAddress, tradingAbi, signer);
       
-      // Wrap with proxy to handle missing methods gracefully
-      const wrappedTokenContract = wrapContractWithFallbacks(tokenContract);
-      const wrappedTradingContract = wrapContractWithFallbacks(tradingContract);
-      
       // Update state with wrapped contracts
       dispatch({ 
         type: actions.contracts.INIT_SUCCESS, 
         payload: { 
-          tokenContract: wrappedTokenContract, 
-          tradingContract: wrappedTradingContract,
+          tokenContract, 
+          tradingContract,
           tokenAddress,
           tradingAddress
         }
       });
       
       return {
-        tokenContract: wrappedTokenContract,
-        tradingContract: wrappedTradingContract,
+        tokenContract,
+        tradingContract,
         tokenAddress,
         tradingAddress
       };
@@ -284,8 +235,6 @@ export const AppProvider = ({ children }) => {
 
   // Connect wallet function - now setupWalletEventListeners and initializeContracts have already been defined
   const connectWallet = async () => {
-    dispatch({ type: actions.wallet.CONNECT_START });
-
     try {
       if (!window.ethereum) throw new Error('MetaMask not installed');
 
@@ -355,8 +304,6 @@ export const AppProvider = ({ children }) => {
     dispatch({ type: actions.wallet.DISCONNECT });
   }, []);
 
-
-  // Simplified executeTransaction - removes redundant error handling
   const executeTransaction = useCallback(async (txFn, errorMsg) => {
     try {
       const tx = await txFn();
@@ -394,30 +341,7 @@ export const AppProvider = ({ children }) => {
     }
   }, [state.contracts.tradingContract, state.contracts.tokenContract]);
 
-  // Get owned tokens - simplified to avoid using tokenOfOwnerByIndex which doesn't exist
-  const getOwnedTokens = useCallback(async (ownerAddress = state.wallet.account) => {
-    try {
-      if (!state.contracts.tokenContract) throw new Error('Token contract not initialized');
-      
-      const balance = await state.contracts.tokenContract.balanceOf(ownerAddress);
-      
-      // Since we don't have a way to enumerate tokens directly,
-      // we'll return the balance indicating how many tokens the user owns
-      return {
-        balance: Number(balance),
-        ownerAddress
-      };
-    } catch (err) {
-      console.error('Failed to get owned tokens', err);
-      return { balance: 0, ownerAddress }; // Return default on error
-    }
-  }, [state.contracts.tokenContract, state.wallet.account]);
-
-  /**
-   * Get detailed card data by token ID
-   * @param {number} tokenId - Token ID to get card data for
-   * @returns {Promise<Object>} Card data 
-   */
+  // Get card data  
   const getCardData = async (tokenId) => {
     const isDev = import.meta.env.MODE === 'development';
 
@@ -592,9 +516,14 @@ export const AppProvider = ({ children }) => {
   }, [state.contracts.tradingContract, executeTransaction]);
 
 
-  // Simplified fetch and format Pokemon data
-  const fetchPokemonData = useCallback(async (pokemonId) => {
-    const isDev = import.meta.env.MODE === 'development' || window.location.hostname === 'localhost';
+  // fetch and format Pokemon data
+  const getPokemonData = useCallback(async (pokemonId) => {
+    const isDev = import.meta.env.MODE === 'development'
+
+    if (!pokemonId || pokemonId < 1 ||  pokemonId > 151) {
+      console.error(`Failed to load Pokemon Data (Not in Range 1-151)`);
+      return null;
+    }
 
     try {
       const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`);
@@ -622,51 +551,11 @@ export const AppProvider = ({ children }) => {
     }
   }, []);
 
-  // Simplified getPokemonData with cache
-  const getPokemonData = useCallback(async (pokemonId) => {
-    const isDev = import.meta.env.MODE === 'development' || window.location.hostname === 'localhost';
-    
-    if (!pokemonId || pokemonId < 1 ||  pokemonId > 151) {
-      console.error(`Failed to load Pokemon Data (Not in Range 1-151)`);
-      return null;
-    }
-
-    try {
-      const data = await fetchPokemonData(pokemonId);
-      return data;
-    } catch (err) {
-      console.error(`Failed to load Pokemon #${pokemonId}:`, err);
-      return null;
-    }
-  }, []);
-
   // Simplified format address
   const formatAddress = address => {
     if (!address) return '';
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
-
-  // Get data for all listed cards
-  const getAllListedCards = useCallback(async () => {
-    
-    try {
-
-      const tokenIds = await getAllListings();
-
-      
-      // Get card data for each token ID
-      const cards = await Promise.all(
-        tokenIds.map(tokenId => getCardData(tokenId))
-      );
-      return cards;
-
-    } catch (error) {
-
-      console.warn('Error fetching marketplace listings:', error);
-      return null;
-    }
-  }, [getAllListings, getCardData]);
-
 
   // Get token IDs owned by the current account
   const getOwnedCards = useCallback(async () => {
@@ -762,19 +651,15 @@ export const AppProvider = ({ children }) => {
   // Clean up contextValue export
   const contextValue = {
     // State
-    wallet: state.wallet,
     contracts: state.contracts,
-    pokemonData: state.pokemonData,
-    
+    account: state.wallet?.account || null,
+
     // Core functionality
     init,
     connectWallet,
     disconnectWallet,
     formatAddress,
-    
-    // Token operations
-    getCardData,
-    
+
     // Marketplace operations
     listCardForSale,
     createAuction,
@@ -784,18 +669,15 @@ export const AppProvider = ({ children }) => {
     endAuction,
     
     // Data retrieval
+    getCardData,
     getPokemonData,
     getAllListings,
     getListingDetails,
     getOwnedCards,
-    getAllListedCards,
 
     // Withdrawal functions
     getPendingWithdrawals,
     withdrawFunds,
-
-    // Account shorthand
-    account: state.wallet?.account || null,
 
     // Diagnostics
     runDiagnostics,
