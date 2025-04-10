@@ -316,7 +316,7 @@ const CardDetailPage = () => {
         <div>
           <div className="mb-6">
             <div className="flex items-center mb-2">
-              <h1 className="text-3xl font-bold mr-3 capitalize">{card.name}</h1>
+              <h1 className="text-2xl md:text-3xl font-bold mr-3 capitalize">{card.name}</h1>
               <span className={classNames(
                 'px-2 py-1 text-xs font-medium rounded', 
                 getRarityClass(card.rarity)
@@ -328,7 +328,7 @@ const CardDetailPage = () => {
             {/* Transaction UI */}
             {listing.isActive && (
               <div className="mb-6 p-4 border border-gray-200 rounded-lg">
-                <h2 className="text-xl font-semibold mb-2">
+                <h2 className="text-lg md:text-xl font-semibold mb-2">
                   {listing.isAuction ? 'Current Auction' : 'Available for Purchase'}
                 </h2>
                 
@@ -348,7 +348,7 @@ const CardDetailPage = () => {
                     </div>
                     
                     {!isOwner && account && !auctionEnded && (
-                      <form onSubmit={handlePlaceBid} className="flex items-end gap-2">
+                      <form onSubmit={handlePlaceBid} className="flex flex-col sm:flex-row sm:items-end gap-2">
                         <div className="flex-1">
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Your Bid (Wei)
@@ -390,7 +390,7 @@ const CardDetailPage = () => {
                       <div className="text-gray-600">Seller:</div>
                       <div className="font-semibold">{formatAddress(listing.seller)}</div>
                     </div>
-                    <div className="text-2xl font-bold mb-2">{formatEth(listing.price)}</div>
+                    <div className="text-xl md:text-2xl font-bold mb-2">{formatEth(listing.price)}</div>
                     {!isOwner && account && (
                       <button
                         onClick={handlePurchase}
@@ -419,7 +419,7 @@ const CardDetailPage = () => {
             {/* Listing UI for owners */}
             {isOwner && !listing.isActive && (
               <div className="mb-6 p-4 border border-gray-200 rounded-lg">
-                <h2 className="text-xl font-semibold mb-4">List This Card</h2>
+                <h2 className="text-lg md:text-xl font-semibold mb-4">List This Card</h2>
                 
                 {/* Listing type selector */}
                 <div className="mb-4">
@@ -599,7 +599,7 @@ const CardDetailPage = () => {
           
           {/* Card Description */}
           <div>
-            <h2 className="text-xl font-semibold mb-2">About This Card</h2>
+            <h2 className="text-lg md:text-xl font-semibold mb-2">About This Card</h2>
             <p className="text-gray-700">
               {card.description || `This is a ${getRarityName(rarity).toLowerCase()} ${name} Pokémon card. It's of the type ${types?.join(' and ')}.`}
             </p>

@@ -99,9 +99,9 @@ const FilterBar = ({ filters, onFilterChange, cardTypes = [] }) => {
         </div>
       </div>
       
-      <div className="mt-4 flex flex-wrap items-end">
+      <div className="flex flex-col md:flex-row md:items-end gap-4 md:gap-0 mt-4">
         {/* Sort options */}
-        <div className="basis-1/2 pr-2">
+        <div className="w-full md:basis-1/2 md:pr-2">
           <label htmlFor="sortBy" className="block text-sm font-medium mb-1 text-gray-700">
             Sort By
           </label>
@@ -118,38 +118,40 @@ const FilterBar = ({ filters, onFilterChange, cardTypes = [] }) => {
             <option value="priceDesc">Price: High to Low</option>
           </select>
         </div>
-        <div class="basis-1/4 px-2 grid grid-cols-1">
-          {/* Auction filter */}
-          <div className="flex items-center">
-            <input
-              id="showAuction"
-              name="showAuction"
-              type="checkbox"
-              checked={filters.showAuction}
-              onChange={handleChange}
-              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-            />
-            <label htmlFor="showAuction" className="ml-2 block text-sm text-gray-700">
-              Show auctions
-            </label>
-          </div>
-          {/* Fixed price filter */}
-          <div className="flex items-center">
-            <input
-              id="showFixedPrice"
-              name="showFixedPrice"
-              type="checkbox"
-              checked={filters.showFixedPrice}
-              onChange={handleChange}
-              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-            />
-            <label htmlFor="showFixedPrice" className="ml-2 block text-sm text-gray-700">
-              Show fixed price
-            </label>
+        <div className="w-full md:basis-1/4 md:px-2">
+          <div className="grid grid-cols-1 gap-1">
+            {/* Auction filter */}
+            <div className="flex items-center">
+              <input
+                id="showAuction"
+                name="showAuction"
+                type="checkbox"
+                checked={filters.showAuction}
+                onChange={handleChange}
+                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+              />
+              <label htmlFor="showAuction" className="ml-2 block text-sm text-gray-700">
+                Show auctions
+              </label>
+            </div>
+            {/* Fixed price filter */}
+            <div className="flex items-center">
+              <input
+                id="showFixedPrice"
+                name="showFixedPrice"
+                type="checkbox"
+                checked={filters.showFixedPrice}
+                onChange={handleChange}
+                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+              />
+              <label htmlFor="showFixedPrice" className="ml-2 block text-sm text-gray-700">
+                Show fixed price
+              </label>
+            </div>
           </div>
         </div>
         {/* Clear filters button */}
-        <div className="basis-1/4 pl-3">
+        <div className="w-full md:basis-1/4 md:pl-2">
           <button
             onClick={() => onFilterChange({
               type: 'all',
