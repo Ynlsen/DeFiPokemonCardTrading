@@ -13,8 +13,9 @@ const MarketplacePage = () => {
   const [loading, setLoading] = useState(true);
 
   const { 
-    getAllListedCards,
+    getAllListings,
     connectWallet,
+    getCardData,
     account
   } = useApp();
 
@@ -30,31 +31,34 @@ const MarketplacePage = () => {
     sortBy: 'idUp'
   });
 
+  const fetchListings = async () => {
+    setLoading(true);
+    try {
+      const data = await getAllListings();
 
-  // Fetch listings when account is available
+      // Get card data for each token ID
+      const cards = await Promise.all(
+        data.map(tokenId => getCardData(tokenId))
+      );
+
+      setListings(cards);
+    } catch (err) {
+      console.error('Error fetching marketplace listings:', err);
+      setListings([]); // Clear listings on error
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchListings = async () => {
-      setLoading(true);
-      try {
-        const data = await getAllListedCards();
-        setListings(data);
-      } catch (err) {
-        console.error('Error fetching marketplace listings:', err);
-        setListings([]); // Clear listings on error
-      } finally {
-        setLoading(false);
-      }
-    };
-
     // Only fetch if account is connected
     if (account) {
       fetchListings();
     } else {
-      // Clear listings if user disconnects
       setListings([]);
       setLoading(false);
     }
-  }, [account, getAllListedCards]); // Depend on account and the fetch function
+  }, [account, getAllListings]);
 
   // Memoize the filtered listings to prevent unnecessary re-renders
   const filteredListings = useMemo(() => {
