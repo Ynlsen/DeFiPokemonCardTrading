@@ -603,17 +603,7 @@ export const AppProvider = ({ children }) => {
       const data = await response.json();
 
       const typeId = data.types.map(type => (type.type.url).substr(31).slice(0,-1));
-
-
-      console.log(typeId);
-
-
-      
-   
-      console.log(typeId);
-
-
-      
+  
       return {
         name: data.name,
         types: data.types.map(type => type.type.name),
