@@ -7,7 +7,7 @@ This project was developed for my DeFi course at ETH. It features a Pokemon card
 The Pokemon Card Trading dApp consists of:
 
 1. **Smart Contracts**: ERC-721 token and marketplace contracts built with Solidity.
-2. **Frontend Application**: React-based UI built with Vite and Tailwind CSS.
+2. **Frontend Application**: UI built with React, Vite, and Tailwind CSS.
 3. **Integration Layer**: ethers.js for blockchain communication.
 4. **External Data**: Pokemon data from PokeAPI.
 
@@ -26,6 +26,11 @@ The project provides easy deployment to both local development environments and 
 - **Development Mode**: Test frontend features without a blockchain connection.
 
 ## Quick Start
+
+**Prerequisites:**
+
+*   `npm`
+*   A wallet provider like MetaMask installed in your browser.
 
 ### Automatic Local Contract Deployment
 
@@ -75,52 +80,57 @@ chmod +x deploy-frontend.sh
 ./deploy-frontend.sh
 ```
 
-If you want to switch networks without deploying the backend again, you must edit the `.env` file yourself or simply delete it.
+If you want to switch networks without deploying the backend again, you must edit the `frontend/.env` file yourself or simply delete it.
 
+### Manual Deployment
 
-### Manual Deployment (Linux)
+While using the automated scripts (`deploy-local.sh`, `deploy-sepolia.sh`) is recommended, you can deploy manually:
 
-If you prefer to deploy the contracts manually, follow these steps:
+**1. Project Setup:**
 
 ```bash
-# Install dependencies
-npm install
-
-# Compile the contracts
-npx hardhat compile
-
-# Start a local Hardhat node (for local development)
-npx hardhat node
-
-# In a new terminal, deploy to local network
-npx hardhat run scripts/deploy.js --network localhost
-
-# OR deploy to Sepolia testnet
-# Ensure your .env file has SEPOLIA_RPC_URL and PRIVATE_KEY defined
-npx hardhat run scripts/deploy.js --network sepolia
+# Install dependencies & compile contracts
+npm install && npx hardhat compile
 ```
 
-After deployment, the contract addresses will be displayed in the terminal. Save these addresses for frontend configuration:
+**2. Deploy Contracts (Choose Local OR Sepolia):**
+
+*   **Option A: Deploy Locally (Hardhat Node)**
+    *   In a separate terminal, run `npx hardhat node` (keep it running).
+    *   Deploy: `npx hardhat run scripts/deploy.js --network localhost`
+    *   Note the deployed contract addresses.
+    *   *Optional (for tests):* Update `./.env` (like `.env.example`) with `TOKEN_ADDRESS` and `TRADING_ADDRESS`.
+
+*   **Option B: Deploy to Sepolia**
+    *   Create `./.env` (like `.env.example`) with your `PRIVATE_KEY` and `SEPOLIA_RPC_URL`.
+    *   Deploy: `npx hardhat run scripts/deploy.js --network sepolia`
+    *   Note the deployed contract addresses.
+
+**3. Configure Frontend:**
 
 ```bash
-# Move to the frontend directory
 cd frontend
+# Create frontend environment file (use frontend/.env.example as template)
+cp .env.example .env # or nano .env
+```
+*   Edit `frontend/.env` with your `VITE_` variables:
+    *   `VITE_TOKEN_CONTRACT_ADDRESS=<your-token-address>`
+    *   `VITE_TRADING_CONTRACT_ADDRESS=<your-trading-address>`
+    *   `VITE_NETWORK_ID=` (Local: `31337`, Sepolia: `11155111`)
+    *   `VITE_RPC_URL=` (Local: `http://localhost:8545`, Sepolia: Your URL)
 
-# Edit the .env file with your contract addresses
-nano .env
-# Add the following lines:
-# VITE_TOKEN_CONTRACT_ADDRESS=<your-token-contract-address>
-# VITE_TRADING_CONTRACT_ADDRESS=<your-trading-contract-address>
+**4. Run Frontend:**
 
+```bash
 # Install frontend dependencies
 npm install
 
-# Start the development server
-npm run dev
-
-# OR build for production
+# Build for production and serve (Recommended)
 npm run build
 npm run serve
+
+# OR run development server (for testing/debugging)
+npm run dev
 ```
 
 ## Technical Architecture
@@ -129,11 +139,11 @@ npm run serve
 
 Two primary smart contracts handle the core functionality:
 
-1. **PokemonCardToken.sol**: Implements the ERC-721 NFT standard using OpenZeppelin contracts. It includes the `ERC721Enumerable` extension.
+1. **PokemonCardToken.sol**: Implements the ERC-721 NFT standard using OpenZeppelin contracts. It includes the ERC721Enumerable extension.
     *   Minting of Pokemon cards with unique attributes (Pokemon ID, Rarity).
     *   Ownership tracking and transfer capabilities.
     *   Metadata storage for Pokemon ID and rarity.
-2. **PokemonCardTrading.sol**: Manages the marketplace logic. It inherits `Ownable`, `ReentrancyGuard`, and `Pausable` from OpenZeppelin.
+2. **PokemonCardTrading.sol**: Manages the marketplace logic. It inherits Ownable, ReentrancyGuard, and Pausable from OpenZeppelin.
     *   Fixed-price listings.
     *   Time-limited auctions.
     *   Secure escrow for listed cards via contract ownership during listing.
@@ -191,9 +201,9 @@ DeFiPokemonCardTrading/
 ### PokemonCardToken
 
 - **ERC-721 Standard**: Fully compliant with ERC-721 NFT standard.
-- **ERC-721Enumerable**: Supports enumeration of tokens owned by an address.
+- **ERC721Enumerable**: Supports enumeration of tokens owned by an address.
 - **Card Attributes**: Each card has a Pokemon ID (1-151) and rarity level (Common, Rare, Epic).
-- **Access Control**: Only the contract owner can mint new cards (`Ownable`).
+- **Access Control**: Only the contract owner can mint new cards (Ownable).
 - **Events**: Comprehensive event emission for minting and transfers.
 
 ### PokemonCardTrading
@@ -201,10 +211,10 @@ DeFiPokemonCardTrading/
 - **Marketplace Features**: Fixed-price listings and auctions.
 - **Security**: Reentrancy protection, secure escrow pattern for listed NFTs.
 - **Emergency Stop**: Pausable functionality allowing the owner to halt trading.
-- **Withdrawal System**: Secure fund withdrawal for sellers (`withdraw` function using pull-payment).
+- **Withdrawal System**: Secure fund withdrawal for sellers using pull-payment.
 - **Auction Mechanics**: Bidding, time-based ending, and finalization.
 - **Listing Management**: Create, cancel, and fulfill listings.
-- **Access Control**: Contract ownership (`Ownable`) for pausing/unpausing.
+- **Access Control**: Contract ownership for pausing/unpausing.
 
 ## Frontend Features
 
@@ -214,7 +224,7 @@ DeFiPokemonCardTrading/
 - **Marketplace**: Browse, buy, and bid on listed cards.
 - **Selling Interface**: List cards for fixed price or auction.
 - **Card Filtering**: Filter cards by Pokemon type, rarity, price, and listing type.
-- **Responsive Design**: Works well on all device sizes
+- **Responsive Design**: Works well on all device sizes.
 
 ## Testing Features
 
@@ -232,7 +242,7 @@ npx hardhat run test/comprehensive-test.js --network localhost
 
 ### Explicit Testing
 
-For more granular testing, connect your wallet to the frontend after deploying locally. Make sure to switch your wallet to the correct local network and use either the private key provided by the deploy-local script or one from the generated hardhat_node.log file to interact with the contracts directly.
+For more granular testing, connect your wallet to the frontend after deploying locally. Make sure to switch your wallet to the correct local network and use either the private key provided by the `deploy-local.sh` script or one from the generated `hardhat_node.log` file to interact with the contracts directly.
 
 ### Frontend Dev Mode
 
@@ -252,33 +262,30 @@ To use development mode:
 
 The contracts implement several best practices:
 
-- **Reentrancy Protection**: Using OpenZeppelin's `ReentrancyGuard` on relevant functions.
-- **Access Control**: Using OpenZeppelin's `Ownable` for administrative functions (minting, pausing). Correct checks for `msg.sender` in user actions (listing, bidding, canceling).
-- **Emergency Stop**: Implemented via OpenZeppelin's `Pausable` contract.
-- **Integer Overflow/Underflow**: Mitigated by using Solidity version `^0.8.0`.
+- **Reentrancy Protection**: Using OpenZeppelin's ReentrancyGuard on relevant functions.
+- **Access Control**: Using OpenZeppelin's Ownable for administrative functions (minting, pausing). Correct checks for `msg.sender` in user actions (listing, bidding, canceling).
+- **Emergency Stop**: Implemented via OpenZeppelin's Pausable contract.
+- **Integer Overflow/Underflow**: Mitigated by using Solidity `^0.8.20`.
 - **Escrow Pattern**: Listed NFTs are transferred to the trading contract, preventing the seller from transferring them elsewhere while listed.
-- **Withdrawal Pattern**: Uses the pull-payment pattern (`withdraw` function) to mitigate reentrancy risks associated with direct transfers.
+- **Withdrawal Pattern**: Uses the pull-payment pattern (withdraw function) to mitigate reentrancy risks associated with direct transfers.
 - **Event Emissions**: Comprehensive event logs for significant actions.
 
 ## Common Issues
 
 - **MetaMask not detecting**: Ensure the browser extension is installed, enabled, and unlocked.
 - **Wrong network**: Switch to the correct network (Localhost, Sepolia) in MetaMask. Check the Chain ID.
-- **Invalid contract addresses**: Double-check the `VITE_TOKEN_CONTRACT_ADDRESS` and `VITE_TRADING_CONTRACT_ADDRESS` in your `frontend/.env` file match the deployed addresses. Ensure the frontend app was restarted after changing `.env`.
+- **Invalid contract addresses**: Double-check that `VITE_TOKEN_CONTRACT_ADDRESS` and `VITE_TRADING_CONTRACT_ADDRESS` in your `frontend/.env` file match the deployed addresses. Ensure the frontend app was restarted after changing `.env`.
 - **Transaction Errors**: Check the browser console and MetaMask activity for detailed error messages. Ensure sufficient funds for gas fees.
 
 ## Etherscan Verification
 
-Contract verification on Etherscan is automatic if the `ETHERSCAN_API_KEY` is correctly set in the project's root `.env` file during deployment via Hardhat. If manual verification is needed:
+Contract verification on Etherscan is automatic if `ETHERSCAN_API_KEY` is correctly set in the project's root `.env` file during deployment via Hardhat. If manual verification is needed:
 
 ```bash
-# Ensure hardhat-etherscan plugin is installed: npm install --save-dev @nomicfoundation/hardhat-verify
-
 # Verify token contract (replace YOUR_TOKEN_ADDRESS)
 npx hardhat verify --network sepolia YOUR_TOKEN_ADDRESS
 
-# Verify trading contract (replace addresses)
-# Constructor argument (_pokemonCardContract) needs to be provided
+# Verify trading contract (replace addresses and provide token address as constructor arg)
 npx hardhat verify --network sepolia YOUR_TRADING_ADDRESS YOUR_TOKEN_ADDRESS
 ```
 
