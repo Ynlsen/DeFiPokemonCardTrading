@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
-import { formatAddress, formatEth, getRarityName, getRarityClass, classNames } from '../utils';
-import { getPokemonImageUrl } from '../utils/getPokemonImageUrl';
+import { formatAddress, formatEth, getRarityName, getRarityClass, classNames, getPokemonImageUrl } from '../utils';
 
 /**
  * CardDetailPage component - Displays detailed information about a specific card

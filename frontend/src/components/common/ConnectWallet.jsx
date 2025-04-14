@@ -1,17 +1,11 @@
 import React from 'react';
 import { useApp } from '../../contexts/AppContext';
-
+import { formatAddress } from '../../utils';
 /**
  * ConnectWallet component - Displays wallet connection status and connect/disconnect buttons
  */
 const ConnectWallet = () => {
   const { account, connectWallet, disconnectWallet } = useApp();
-
-  // Format address for display (0x1234...5678)
-  const formatAddress = (address) => {
-    if (!address) return '';
-    return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
-  };
 
   return (
     <div className="flex items-center">
