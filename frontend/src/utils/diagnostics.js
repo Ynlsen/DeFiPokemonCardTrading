@@ -1,16 +1,10 @@
-/**
- * Utility functions for diagnosing contract connectivity issues
- */
+// Utility functions for diagnosing contract connectivity issues
 
-/**
- * Checks for required environment variables
- * @returns {Object} Object containing environment variable status
- */
+// Checks for required environment variables
 const checkEnvironmentVariables = () => {
   try {
     console.log('Checking environment variables...');
     
-    // Check for contract addresses and API key
     const tokenAddress = import.meta.env.VITE_TOKEN_CONTRACT_ADDRESS;
     const tradingAddress = import.meta.env.VITE_TRADING_CONTRACT_ADDRESS;
     const etherscanApiKey = import.meta.env.VITE_ETHERSCAN_API_KEY;
@@ -34,13 +28,7 @@ const checkEnvironmentVariables = () => {
   }
 };
 
-/**
- * Run a series of diagnostics on contracts and wallet connection
- * @param {Object} contracts - Object containing contract instances
- * @param {Object} wallet - Object containing wallet info
- * @param {Function} getEnvVars - Function to get environment variables
- * @returns {Object} Diagnostic results
- */
+// Run a series of diagnostics on contracts and wallet connection
 export const runContractDiagnostics = async (contracts = {}, wallet = {}, getEnvVars = () => ({})) => {
   const results = {
     timestamp: new Date().toISOString(),
@@ -92,22 +80,18 @@ export const runContractDiagnostics = async (contracts = {}, wallet = {}, getEnv
     results.tradingContract.initialized = true;
     
     try {
-      // Try to call simple view function
-      const listingCount = await contracts.tradingContract.listings(0);
+      // Try to call simple view function (using listing at index 0 as a test)
+      await contracts.tradingContract.listings(0); // Just call it, don't need the result
       results.tradingContract.canCall = true;
     } catch (error) {
-      results.tradingContract.errors.push(error?.message || 'Unknown error calling getListingCount()');
+      results.tradingContract.errors.push(error?.message || 'Unknown error calling listings(0)');
     }
   }
 
   return results;
 };
 
-/**
- * Format diagnostic results as human-readable text
- * @param {Object} results - Diagnostic results from runContractDiagnostics
- * @returns {String} Formatted diagnostic results
- */
+// Format diagnostic results as human-readable text
 export const formatDiagnosticResults = (results) => {
   if (!results) return 'No diagnostic results available';
 
@@ -127,13 +111,12 @@ TOKEN CONTRACT:
 - Initialized: ${results.tokenContract.initialized ? 'Yes' : 'No'}
 - Can Call Functions: ${results.tokenContract.canCall ? 'Yes' : 'No'}
 ${results.tokenContract.supportsERC721 !== undefined ? `- Supports ERC721: ${results.tokenContract.supportsERC721 ? 'Yes' : 'No'}` : ''}
-${results.tokenContract.errors && results.tokenContract.errors.length > 0 ? `- Errors: ${results.tokenContract.errors.join(', ')}` : ''}
+${results.tokenContract.errors && results.tokenContract.errors.length > 0 ? `- Errors: ${results.tokenContract.errors.join('; ')}` : ''}
 
 TRADING CONTRACT:
 - Initialized: ${results.tradingContract.initialized ? 'Yes' : 'No'}
 - Can Call Functions: ${results.tradingContract.canCall ? 'Yes' : 'No'}
-${results.tradingContract.listingCount !== undefined ? `- Listing Count: ${results.tradingContract.listingCount}` : ''}
-${results.tradingContract.errors && results.tradingContract.errors.length > 0 ? `- Errors: ${results.tradingContract.errors.join(', ')}` : ''}
+${results.tradingContract.errors && results.tradingContract.errors.length > 0 ? `- Errors: ${results.tradingContract.errors.join('; ')}` : ''}
 
 ENVIRONMENT VARIABLES:
 - Token Contract: ${results.envVars.tokenAddress}

@@ -36,20 +36,12 @@ const STABLE_MOCK_CACHE = {
   }
 };
 
-/**
- * Generate mock card data for a specific token ID
- * @param {number} tokenId - Token ID to generate data for
- * @returns {Object} Mock card data
- */
+// Generate mock card data for a specific token ID
 export const generateMockCard = (tokenId) => {
   return STABLE_MOCK_CACHE.getForTokenId(tokenId);
 };
 
-/**
- * Generate a mock listing for a token
- * @param {number} tokenId - Token ID to generate listing for
- * @returns {Object} Mock listing data
- */
+// Generate a mock listing for a token
 export const generateMockListing = (tokenId) => {
   const card = STABLE_MOCK_CACHE.getForTokenId(tokenId);
   
@@ -76,9 +68,3 @@ export const generateMockListing = (tokenId) => {
     listingTime: Date.now() - (tokenId * 60000) // Staggered listing times
   };
 };
-
-// Export functions
-export default {
-  generateMockCard,
-  generateMockListing
-}; 

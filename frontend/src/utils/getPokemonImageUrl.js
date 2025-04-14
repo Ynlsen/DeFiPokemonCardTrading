@@ -1,8 +1,4 @@
-/**
- * Gets the image URL for a Pokémon
- * @param {number} pokemonId - The Pokémon ID (1-151)
- * @returns {string} - The URL to the Pokémon image
- */
+// Gets the image URL for a Pokémon using local assets
 export const getPokemonImageUrl = (pokemonId) => {
   if (!pokemonId) return '/assets/placeholder.svg';
   
@@ -21,6 +17,4 @@ export const getPokemonImageUrl = (pokemonId) => {
     console.error('Error generating Pokemon image URL:', error);
     return '/assets/placeholder.svg';
   }
-};
-
-export default getPokemonImageUrl; 
+}; 
