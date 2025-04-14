@@ -1,14 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Button from './Button';
 
 /**
- * ErrorFallback component displays a user-friendly error message
- * when an unhandled error occurs in the application
- * 
- * @param {object} props - Component props
- * @param {Error} props.error - The error object that was caught
- * @param {Function} props.resetErrorBoundary - Function to reset the error boundary
+ * ErrorFallback component - Displays a user-friendly error message
  */
 const ErrorFallback = ({ error, resetErrorBoundary }) => {
   // Log the error to the console for debugging
@@ -17,6 +11,9 @@ const ErrorFallback = ({ error, resetErrorBoundary }) => {
     // In a production app, you would send this to an error tracking service
     // Example: Sentry.captureException(error);
   }, [error]);
+
+  // Base classes for standard size buttons (md)
+  const baseButtonClasses = 'inline-flex items-center justify-center rounded font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 px-4 py-2 text-base';
 
   return (
     <div 
@@ -51,18 +48,20 @@ const ErrorFallback = ({ error, resetErrorBoundary }) => {
       </div>
       
       <div className="flex justify-center space-x-4">
-        <Button
+        <button
+          type="button"
           onClick={() => window.location.href = '/'}
-          variant="secondary"
+          className={`${baseButtonClasses} bg-purple-600 hover:bg-purple-700 text-white focus:ring-purple-500`}
         >
           Go to Home
-        </Button>
-        <Button
+        </button>
+        <button
+          type="button"
           onClick={resetErrorBoundary}
-          variant="primary"
+          className={`${baseButtonClasses} bg-indigo-600 hover:bg-indigo-700 text-white focus:ring-indigo-500`}
         >
           Try Again
-        </Button>
+        </button>
       </div>
     </div>
   );
