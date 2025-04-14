@@ -3,10 +3,6 @@ import { getRarityName } from '../../utils';
 
 /**
  * FilterBar component - Provides filtering options for the marketplace
- * @param {Object} props
- * @param {Object} props.filters - Current filter values
- * @param {Function} props.onFilterChange - Handler for filter changes
- * @param {Array} props.cardTypes - Available card types for filtering
  */
 const FilterBar = ({ filters, onFilterChange, cardTypes = [] }) => {
   const handleChange = (e) => {

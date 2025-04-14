@@ -2,11 +2,6 @@ import React from 'react';
 
 /**
  * EmptyState component - Displays a message when no content is available
- * @param {Object} props
- * @param {string} props.title - Title of the empty state
- * @param {string} props.message - Message to display
- * @param {string} props.buttonText - Text for the action button (optional)
- * @param {Function} props.buttonAction - Function to call when button is clicked (optional)
  */
 const EmptyState = ({
   title = 'No Content',
