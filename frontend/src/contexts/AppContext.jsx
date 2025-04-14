@@ -3,6 +3,7 @@ import { ethers } from 'ethers';
 import { produce } from 'immer';
 import { generateMockCard } from '../utils/mockData';
 import { runContractDiagnostics, formatDiagnosticResults } from '../utils/diagnostics';
+import { getNetworkName } from '../utils';
 
 // Import ABIs and contract addresses
 import PokemonCardTokenABI from '../contracts/PokemonCardToken.json';
@@ -43,15 +44,11 @@ const initialState = {
 const actions = {
   wallet: {
     CONNECT_SUCCESS: 'wallet/connect-success',
-    CONNECT_ERROR: 'wallet/connect-error',
     DISCONNECT: 'wallet/disconnect',
     UPDATE: 'wallet/update'
   },
   contracts: {
-    INIT_START: 'contracts/init-start',
     INIT_SUCCESS: 'contracts/init-success',
-    INIT_ERROR: 'contracts/init-error',
-    UPDATE: 'contracts/update'
   },
 };
 
@@ -62,11 +59,6 @@ const appReducer = (state, action) => {
     case actions.wallet.CONNECT_SUCCESS:
       return produce(state, draft => {
         Object.assign(draft.wallet, action.payload);
-      });
-      
-    case actions.wallet.CONNECT_ERROR:
-      return produce(state, draft => {
-        draft.wallet.error = action.payload;
       });
       
     case actions.wallet.DISCONNECT:
@@ -81,28 +73,7 @@ const appReducer = (state, action) => {
       });
       
     // Contract actions
-    case actions.contracts.INIT_START:
-      return produce(state, draft => {
-        draft.contracts.loading = true;
-        draft.contracts.error = null;
-      });
-      
     case actions.contracts.INIT_SUCCESS:
-      return produce(state, draft => {
-        Object.assign(draft.contracts, action.payload);
-        draft.contracts.loading = false;
-        draft.contracts.error = null;
-      });
-      
-    case actions.contracts.INIT_ERROR:
-      return produce(state, draft => {
-        draft.contracts.loading = false;
-        draft.contracts.error = action.payload;
-        draft.contracts.tokenContract = null;
-        draft.contracts.tradingContract = null;
-      });
-      
-    case actions.contracts.UPDATE:
       return produce(state, draft => {
         Object.assign(draft.contracts, action.payload);
       });
@@ -118,24 +89,6 @@ const appReducer = (state, action) => {
 export const AppProvider = ({ children }) => {
   const [state, dispatch] = useReducer(appReducer, initialState);
   
-  // Helper to get network name from chain ID
-  const getNetworkName = (chainId) => {
-    const networks = {
-      1: 'Ethereum Mainnet',
-      3: 'Ropsten Testnet',
-      4: 'Rinkeby Testnet',
-      5: 'Goerli Testnet',
-      42: 'Kovan Testnet',
-      56: 'Binance Smart Chain',
-      137: 'Polygon Mainnet',
-      31337: 'Hardhat Network',
-      80001: 'Polygon Mumbai',
-      11155111: 'Sepolia'
-    };
-    
-    return networks[chainId] || `Chain ID ${chainId}`;
-  };
-
   // Simplified contract initialization
   const initializeContracts = async (provider) => {
     try {
@@ -154,7 +107,7 @@ export const AppProvider = ({ children }) => {
       const tokenContract = new ethers.Contract(tokenAddress, tokenAbi, signer);
       const tradingContract = new ethers.Contract(tradingAddress, tradingAbi, signer);
       
-      // Update state with wrapped contracts
+      // Update state with contracts
       dispatch({ 
         type: actions.contracts.INIT_SUCCESS, 
         payload: { 
@@ -165,23 +118,15 @@ export const AppProvider = ({ children }) => {
         }
       });
       
-      return {
-        tokenContract,
-        tradingContract,
-        tokenAddress,
-        tradingAddress
-      };
+      return { tokenContract, tradingContract, tokenAddress, tradingAddress };
+
     } catch (error) {
-      console.error('AAAAAAA',error)
-      dispatch({ 
-        type: actions.contracts.INIT_ERROR, 
-        payload: error.message
-      });
+      console.error('Contract initialization error:', error);
       return null;
     }
   };
 
-  // Setup wallet event listeners - defining before connectWallet to avoid circular dependency
+  // Setup wallet event listeners 
   const setupWalletEventListeners = useCallback(() => {
     if (!window.ethereum) return;
     
@@ -233,7 +178,7 @@ export const AppProvider = ({ children }) => {
     };
   }, []);
 
-  // Connect wallet function - now setupWalletEventListeners and initializeContracts have already been defined
+  // Connect wallet function 
   const connectWallet = async () => {
     try {
       if (!window.ethereum) throw new Error('MetaMask not installed');
@@ -245,7 +190,8 @@ export const AppProvider = ({ children }) => {
       const network = await provider.getNetwork();
       const chainId = Number(network.chainId);
       const networkName = getNetworkName(chainId);
-      console.log(account);
+      console.log('Connected account:', account);
+
       dispatch({
         type: actions.wallet.CONNECT_SUCCESS,
         payload: { account, provider, signer, chainId, networkName }
@@ -257,10 +203,6 @@ export const AppProvider = ({ children }) => {
       return { account, provider, signer };
     } catch (error) {
       console.error('Error connecting wallet:', error);
-      dispatch({ 
-        type: actions.wallet.CONNECT_ERROR, 
-        payload: error.message
-      });
       return null;
     }
   };
@@ -278,7 +220,7 @@ export const AppProvider = ({ children }) => {
       // Make sure we have a valid contracts object even if initialization fails
       if (!state.contracts) {
         dispatch({
-          type: actions.contracts.UPDATE,
+          type: actions.contracts.INIT_SUCCESS,
           payload: { tokenContract: null, tradingContract: null }
         });
       }
@@ -551,12 +493,6 @@ export const AppProvider = ({ children }) => {
     }
   }, []);
 
-  // Simplified format address
-  const formatAddress = address => {
-    if (!address) return '';
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
-  };
-
   // Get token IDs owned by the current account
   const getOwnedCards = useCallback(async () => {
     const ownerAddress = state.wallet.account;
@@ -658,7 +594,6 @@ export const AppProvider = ({ children }) => {
     init,
     connectWallet,
     disconnectWallet,
-    formatAddress,
 
     // Marketplace operations
     listCardForSale,
