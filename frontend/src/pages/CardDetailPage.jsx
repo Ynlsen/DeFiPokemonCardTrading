@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
 import { formatAddress, formatEth, getRarityName, getRarityClass, classNames, getPokemonImageUrl } from '../utils';
