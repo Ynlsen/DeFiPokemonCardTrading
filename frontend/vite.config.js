@@ -2,23 +2,14 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 
-// https://vitejs.dev/config/
+// Vite configuration file
 export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
     cors: true,
-    // Proxy API requests to the backend server during development
-    proxy: {
-      // If you have a separate API backend:
-      // '/api': {
-      //   target: 'http://localhost:8000',
-      //   changeOrigin: true,
-      // },
-    },
   },
-  // Use relative paths for assets in production build
-  base: './',
+  base: './', // Use relative paths for assets in build
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -32,17 +23,12 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    // Don't use source maps in production to reduce size
-    sourcemap: true,
-    // Optimize chunk sizes
+    sourcemap: true, // For  debugging
     chunkSizeWarningLimit: 1000,
-    // Copy assets to a predictable location
     assetsDir: 'assets',
-    // Include images with these extensions in the build
-    assetsInclude: ['**/*.jpg', '**/*.png', '**/*.svg'],
     rollupOptions: {
       output: {
-        // Separate vendor code from application code
+        // Separate vendor code into chunks for better caching
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
           ethers: ['ethers'],
@@ -50,13 +36,11 @@ export default defineConfig({
       },
     },
   },
-  // Optimize dependency pre-bundling
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom', 'ethers'],
     esbuildOptions: {
       jsx: 'automatic'
     }
   },
-  // Add public directory handling
   publicDir: 'public',
 }) 
