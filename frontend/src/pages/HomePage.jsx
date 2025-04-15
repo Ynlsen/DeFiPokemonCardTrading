@@ -15,7 +15,7 @@ const FeatureItem = ({ icon, title, description }) => (
 // Skeleton loader for cards
 const CardSkeleton = () => (
   <div className="animate-pulse">
-    <div className="aspect-square bg-gray-200 rounded-lg mb-2"></div>
+    <div className="aspect-509/700 bg-gray-200 rounded-lg mb-2"></div>
     <div className="h-4 bg-gray-200 rounded w-3/4 mb-1"></div>
     <div className="h-3 bg-gray-200 rounded w-1/2"></div>
   </div>
@@ -167,22 +167,10 @@ const HomePage = () => {
       ) : (
         <>
           {/* Hero Section */}
-          <section className="text-center py-12 mb-16">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">Crypto Pokémon Card Trading</h1>
+          <section className="text-center pb-12 mb-4"> 
             <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Collect, trade, and sell unique Pokémon cards on the blockchain with secure ownership and transparent transactions.
+              Collect, buy, and sell unique Pokémon cards on the blockchain with secure ownership and transparent transactions.
             </p>
-            
-            <div className="flex justify-center gap-4 flex-wrap">
-              {!account && (
-                <button 
-                  onClick={connectWallet}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-lg transition-colors"
-                >
-                  Connect Wallet
-                </button>
-              )}
-            </div>
           </section>
 
           {/* Featured Cards */}
@@ -214,22 +202,22 @@ const HomePage = () => {
 
           {/* Features Section */}
           <section className="mb-16">
-            <h2 className="text-2xl font-bold mb-6 text-center">Why Crypto Pokémon Cards?</h2>
+            <h2 className="text-2xl font-bold mb-6 text-center">Why Trade Pokémon Cards on Blockchain?</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <FeatureItem 
                 icon="🔍"
                 title="Unique Cards"
-                description="Each card has different rarities and authenticity verified on the blockchain."
+                description="Own verifiably authentic Pokémon cards with varying rarities, secured on the blockchain."
               />
               <FeatureItem 
                 icon="💰"
-                title="Buy & Sell"
-                description="Purchase cards directly or participate in auctions to get the cards you want."
+                title="Flexible Trading"
+                description="Buy cards instantly at fixed prices or bid in exciting time-based auctions."
               />
               <FeatureItem 
                 icon="🔒"
                 title="Secure Ownership"
-                description="Your collection is securely stored on the blockchain with proof of ownership."
+                description="Trade with confidence knowing your ownership is cryptographically secured on-chain."
               />
             </div>
           </section>
@@ -243,28 +231,28 @@ const HomePage = () => {
                   <span className="flex-shrink-0 flex items-center justify-center w-8 h-8 bg-indigo-600 text-white rounded-full mr-3">1</span>
                   <div>
                     <h3 className="font-semibold">Connect Your Wallet</h3>
-                    <p className="text-gray-600 text-sm md:text-base">Link your Ethereum wallet to start collecting and trading cards.</p>
+                    <p className="text-gray-600 text-sm md:text-base">Connect your Ethereum wallet (like MetaMask) to get started.</p>
                   </div>
                 </li>
                 <li className="flex items-start">
                   <span className="flex-shrink-0 flex items-center justify-center w-8 h-8 bg-indigo-600 text-white rounded-full mr-3">2</span>
                   <div>
                     <h3 className="font-semibold">Browse the Marketplace</h3>
-                    <p className="text-gray-600 text-sm md:text-base">Explore available cards or filter by rarity, price, and type.</p>
+                    <p className="text-gray-600 text-sm md:text-base">Explore listings, filter by traits, and find your next favorite card.</p>
                   </div>
                 </li>
                 <li className="flex items-start">
                   <span className="flex-shrink-0 flex items-center justify-center w-8 h-8 bg-indigo-600 text-white rounded-full mr-3">3</span>
                   <div>
-                    <h3 className="font-semibold">Buy or Bid on Cards</h3>
-                    <p className="text-gray-600 text-sm md:text-base">Purchase cards directly or participate in auctions.</p>
+                    <h3 className="font-semibold">Buy or Bid</h3>
+                    <p className="text-gray-600 text-sm md:text-base">Purchase cards at a fixed price or place bids in thrilling auctions.</p>
                   </div>
                 </li>
                 <li className="flex items-start">
                   <span className="flex-shrink-0 flex items-center justify-center w-8 h-8 bg-indigo-600 text-white rounded-full mr-3">4</span>
                   <div>
                     <h3 className="font-semibold">Manage Your Collection</h3>
-                    <p className="text-gray-600 text-sm md:text-base">View, list, or auction your owned cards in your personal collection.</p>
+                    <p className="text-gray-600 text-sm md:text-base">View your owned cards, list them for sale, or start an auction.</p>
                   </div>
                 </li>
               </ol>
