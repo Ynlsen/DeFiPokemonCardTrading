@@ -8,8 +8,6 @@ const ErrorFallback = ({ error, resetErrorBoundary }) => {
   // Log the error to the console for debugging
   React.useEffect(() => {
     console.error('Application error:', error);
-    // In a production app, you would send this to an error tracking service
-    // Example: Sentry.captureException(error);
   }, [error]);
 
   // Base classes for standard size buttons (md)

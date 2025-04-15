@@ -18,7 +18,7 @@ import { Link } from 'react-router-dom';
 import ConnectWallet from './components/common/ConnectWallet';
 
 /**
- * Main application component that sets up routing and global providers
+ * Main application component - sets up routing and global providers
  */
 
 const NAV_LINKS = [
