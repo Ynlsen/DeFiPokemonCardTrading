@@ -1,4 +1,4 @@
-import React, { memo, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { formatEth, getRarityClass, getRarityName, formatAddress, getPokemonImageUrl } from '../../utils';
 import { useApp } from '../../contexts/AppContext';
