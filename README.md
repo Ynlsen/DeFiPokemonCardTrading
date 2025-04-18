@@ -21,7 +21,7 @@ The project provides easy deployment to both local development environments and 
 - **Wallet Integration**: Connect directly with MetaMask.
 - **Collection Management**: View and manage your card collection.
 - **Responsive Design**: Full functionality on desktop and mobile devices.
-- **Type-based Filtering**: Filter cards by Pokemon type, rarity, and more.
+- **Advanced Filtering**: Filter cards by Pokemon type, rarity, and more.
 - **Local Testnet Scripts**: Test contract functionality without deploying.
 - **Development Mode**: Test frontend features without a blockchain connection.
 
